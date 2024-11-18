@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../model/numeracion.dart';
 import '../model/user.dart';
 
 class ApiService {
@@ -86,6 +87,34 @@ class ApiService {
       if (response.statusCode == 200) {
         final List<dynamic> responseData = jsonDecode(response.body);
         return responseData.map((data) => User.fromJson(data)).toList();
+      } else {
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+
+  // Método para obtener numeraciones paginadas
+  Future<NumeracionPage> getNumeraciones(int page, int size) async {
+    final url = Uri.parse('$baseUrl/numeracion/list?page=$page&size=$size');
+    final token = await _getToken();
+    print('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Mapea la respuesta JSON al modelo NumeracionPage
+        return NumeracionPage.fromJson(jsonDecode(response.body));
       } else {
         throw Exception('Error: ${response.statusCode}');
       }

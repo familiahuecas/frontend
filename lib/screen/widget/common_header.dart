@@ -9,7 +9,7 @@ class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.limeAccent, // Color de fondo
+      backgroundColor: Colors.black26, // Color de fondo
       centerTitle: true, // Centrar el título
       title: Text(
         'Familia Huecas - $title',
