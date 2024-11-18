@@ -1,6 +1,12 @@
+import 'package:familiahuecasfrontend/screen/user.dart';
+import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
 import 'package:flutter/material.dart';
 import '../apirest/api_service.dart';
 import '../model/user.dart';
+import 'documentos.dart';
+import 'gestion.dart';
+import 'maquinas.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final String token;
@@ -12,21 +18,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<User> users = [];
+  User? currentUser;
   bool _isLoading = true;
   final ApiService apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    fetchUsers();
+    fetchCurrentUser();
   }
 
-  Future<void> fetchUsers() async {
+  Future<void> fetchCurrentUser() async {
     try {
-      final fetchedUsers = await apiService.getUsers();
+      final user = await apiService.getUser();
       setState(() {
-        users = fetchedUsers;
+        currentUser = user;
         _isLoading = false;
       });
     } catch (e) {
@@ -40,26 +46,157 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Usuarios - Familia Huecas'),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : DataTable(
-        columns: const [
-          DataColumn(label: Text('ID')),
-          DataColumn(label: Text('Nombre')),
-          DataColumn(label: Text('Email')),
-          DataColumn(label: Text('Roles')),
-        ],
-        rows: users.map((user) {
-          return DataRow(cells: [
-            DataCell(Text(user.id.toString())),
-            DataCell(Text(user.name)),
-            DataCell(Text(user.email)),
-            DataCell(Text(user.roles.join(', '))),
-          ]);
-        }).toList(),
+      appBar: CommonHeader(title: 'Home'), // Usa CommonHeader aquí
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(16.0),
+          child: _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : currentUser == null
+              ? Center(child: Text('Error al cargar la información del usuario'))
+              : Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Bienvenido, ${currentUser!.name}',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              SizedBox(height: 24),
+              // Botón "Usuarios"
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => UsersScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent,
+                  minimumSize: Size(double.infinity, 100),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.person, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      'Usuarios',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Botón "Gestión"
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => GestionScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.greenAccent,
+                  minimumSize: Size(double.infinity, 100),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.settings, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      'Gestión',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Botón "Máquinas"
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MaquinasScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  minimumSize: Size(double.infinity, 100),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.computer, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      'Máquinas',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Botón "Documentos"
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DocumentosScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purpleAccent,
+                  minimumSize: Size(double.infinity, 100),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.folder, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      'Documentos',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

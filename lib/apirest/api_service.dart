@@ -8,18 +8,37 @@ import '../model/user.dart';
 class ApiService {
   final String baseUrl = kIsWeb
       ? '${const String.fromEnvironment('API_URL_WEB')}/backend'  // URL para la web
-      : '${const String.fromEnvironment('API_URL')}/backend'  ;// URL para la phone
+      : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el teléfono
 
+  // Método para obtener el token
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
 
+  // Método para guardar el token
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
   }
 
+  // Método para guardar el usuario
+  Future<void> saveUser(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(user.toJson())); // Guardar usuario como JSON
+  }
+
+  // Método para obtener el usuario
+  Future<User?> getUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      return User.fromJson(jsonDecode(userJson)); // Convertir JSON a objeto User
+    }
+    return null;
+  }
+
+  // Método POST con autenticación opcional
   Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body, {bool requiresAuth = true}) async {
     final url = Uri.parse('$baseUrl$endpoint');
     final token = requiresAuth ? await _getToken() : null;
@@ -47,7 +66,7 @@ class ApiService {
     }
   }
 
-
+  // Método GET para obtener usuarios
   Future<List<User>> getUsers() async {
     final url = Uri.parse('$baseUrl/users/list');
     final token = await _getToken();
