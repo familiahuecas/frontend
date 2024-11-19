@@ -13,7 +13,7 @@ Numeracion _$NumeracionFromJson(Map<String, dynamic> json) => Numeracion(
       entrada_m2: (json['entrada_m2'] as num).toInt(),
       salida_m2: (json['salida_m2'] as num).toInt(),
       bar: json['bar'] as String,
-      fecha: DateTime.parse(json['fecha'] as String),
+      fecha: json['fecha'] as String,
     );
 
 Map<String, dynamic> _$NumeracionToJson(Numeracion instance) =>
@@ -24,7 +24,7 @@ Map<String, dynamic> _$NumeracionToJson(Numeracion instance) =>
       'entrada_m2': instance.entrada_m2,
       'salida_m2': instance.salida_m2,
       'bar': instance.bar,
-      'fecha': instance.fecha.toIso8601String(),
+      'fecha': instance.fecha,
     };
 
 NumeracionPage _$NumeracionPageFromJson(Map<String, dynamic> json) =>

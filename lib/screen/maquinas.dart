@@ -1,78 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
 
+import 'hacerrecaudacion_screen.dart';
 import 'numeraciones.dart';
-
-
 
 class MaquinasScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonHeader(title: 'Máquinas'), // Usa CommonHeader
-      body: Column(
-        children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.symmetric(vertical: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Botón "Hacer Recaudación"
+              TextButton(
                 onPressed: () {
-                  _showMenuDialog(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HacerRecaudacionScreen()),
+                  );
                 },
-                icon: Icon(Icons.menu, color: Colors.white),
-                label: Text('Menú', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 80),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.blueGrey, width: 1.5),
+                  ),
+                  elevation: 5,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.monetization_on, color: Colors.blueGrey, size: 32),
+                    SizedBox(height: 8),
+                    Text(
+                      'Hacer Recaudación',
+                      style: TextStyle(
+                        color: Colors.blueGrey,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+              SizedBox(height: 16),
+              // Botón "Histórico de Recaudaciones"
+              TextButton(
+                onPressed: () {
+                  // Lógica para "Histórico de recaudaciones"
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 80),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.teal, width: 1.5),
+                  ),
+                  elevation: 5,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.history, color: Colors.teal, size: 32),
+                    SizedBox(height: 8),
+                    Text(
+                      'Histórico de Recaudaciones',
+                      style: TextStyle(
+                        color: Colors.teal,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Botón "Numeraciones"
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NumeracionesScreen()),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 80),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.deepOrange, width: 1.5),
+                  ),
+                  elevation: 5,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.format_list_numbered, color: Colors.deepOrange, size: 32),
+                    SizedBox(height: 8),
+                    Text(
+                      'Numeraciones',
+                      style: TextStyle(
+                        color: Colors.deepOrange,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Center(
-              child: Text('Pantalla de Máquinas'),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-
-  void _showMenuDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text('Menú de Máquinas'),
-          children: [
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context);
-                // Lógica para "Hacer recaudación"
-              },
-              child: Text('Hacer recaudación'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context);
-                // Lógica para "Histórico de recaudaciones"
-              },
-              child: Text('Histórico de recaudaciones'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NumeracionesScreen()),
-                );
-              },
-              child: Text('Numeraciones'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
 }

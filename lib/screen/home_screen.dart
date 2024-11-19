@@ -48,13 +48,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: CommonHeader(title: 'Home'), // Usa CommonHeader aquí
       body: Center(
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          padding: const EdgeInsets.all(16.0),
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.symmetric(vertical: 24.0),
           child: _isLoading
               ? Center(child: CircularProgressIndicator())
               : currentUser == null
               ? Center(child: Text('Error al cargar la información del usuario'))
-              : SingleChildScrollView( // Hace que el contenido sea desplazable
+              : SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -63,36 +63,38 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey,
                   ),
                 ),
-                SizedBox(height: 8),
                 SizedBox(height: 24),
                 // Botón "Usuarios"
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => UsersScreen()),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orangeAccent,
-                    minimumSize: Size(double.infinity, 100),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Color(0xFFFFB74D), width: 1.5), // Naranja pastel
                     ),
+                    elevation: 5,
                   ),
-                  child: Row(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.person, color: Colors.white),
-                      SizedBox(width: 10),
+                      Icon(Icons.person, color: Color(0xFFFFB74D), size: 32), // Naranja pastel
+                      SizedBox(height: 8),
                       Text(
                         'Usuarios',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFFFFB74D), // Naranja pastel
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -100,31 +102,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 16),
                 // Botón "Gestión"
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => GestionScreen()),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent,
-                    minimumSize: Size(double.infinity, 100),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Color(0xFFA5D6A7), width: 1.5), // Verde pastel
                     ),
+                    elevation: 5,
                   ),
-                  child: Row(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.settings, color: Colors.white),
-                      SizedBox(width: 10),
+                      Icon(Icons.settings, color: Color(0xFFA5D6A7), size: 32), // Verde pastel
+                      SizedBox(height: 8),
                       Text(
                         'Gestión',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFFA5D6A7), // Verde pastel
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -132,31 +136,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 16),
                 // Botón "Máquinas"
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => MaquinasScreen()),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    minimumSize: Size(double.infinity, 100),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Color(0xFF81D4FA), width: 1.5), // Azul pastel
                     ),
+                    elevation: 5,
                   ),
-                  child: Row(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.computer, color: Colors.white),
-                      SizedBox(width: 10),
+                      Icon(Icons.computer, color: Color(0xFF81D4FA), size: 32), // Azul pastel
+                      SizedBox(height: 8),
                       Text(
                         'Máquinas',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF81D4FA), // Azul pastel
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -164,31 +170,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 16),
                 // Botón "Documentos"
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => DocumentosScreen()),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purpleAccent,
-                    minimumSize: Size(double.infinity, 100),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Color(0xFFCE93D8), width: 1.5), // Morado pastel
                     ),
+                    elevation: 5,
                   ),
-                  child: Row(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.folder, color: Colors.white),
-                      SizedBox(width: 10),
+                      Icon(Icons.folder, color: Color(0xFFCE93D8), size: 32), // Morado pastel
+                      SizedBox(height: 8),
                       Text(
                         'Documentos',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFFCE93D8), // Morado pastel
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],

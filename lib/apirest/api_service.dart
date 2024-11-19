@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/numeracion.dart';
+import '../model/recaudacionrequest.dart';
+import '../model/recaudacionresponse.dart';
 import '../model/user.dart';
 
 class ApiService {
@@ -117,6 +119,88 @@ class ApiService {
         return NumeracionPage.fromJson(jsonDecode(response.body));
       } else {
         throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  // Método para eliminar numeraciones con autenticación
+  Future<void> deleteNumeracion(int id) async {
+    final url = Uri.parse('$baseUrl/numeracion/deleteNumeracion/$id');
+    final token = await _getToken(); // Obtener el token almacenado
+
+    print('Haciendo llamada DELETE a: $url');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.statusCode}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Error al eliminar la numeración: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  // Método para calcular la recaudación
+  Future<Recaudacionresponse> calculateRec(Recaudacionrequest request) async {
+    final url = Uri.parse('$baseUrl/numeracion/calculateRec');
+    final token = await _getToken();
+
+    // Log para ver qué se le envía al servicio
+    print('Enviando solicitud a: $url');
+    print('Headers: ${{
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    }}');
+    print('Body: ${request.toJson()}');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(request.toJson()), // Convertir el objeto request a JSON
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return Recaudacionresponse.fromJson(jsonDecode(response.body)); // Mapear la respuesta a RecaudacionResponse
+      } else {
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  // Método para guardar la recaudación
+  Future<void> guardarRecaudacion(Recaudacionrequest request) async {
+    final url = Uri.parse('$baseUrl/numeracion/guardar');
+    final token = await _getToken();
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        print('Recaudación guardada con éxito');
+      } else {
+        throw Exception('Error al guardar la recaudación: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error de red o del servidor: $e');

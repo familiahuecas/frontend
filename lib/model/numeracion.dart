@@ -22,7 +22,7 @@ class Numeracion implements BaseModel{
   int salida_m2;
 
   String bar;
-  DateTime fecha;
+  String fecha;
 
   Numeracion({
     required this.id,

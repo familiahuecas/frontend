@@ -24,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        // Llamada al servicio de login
         final response = await apiService.post(
           '/auth/login',
           {
@@ -38,20 +37,13 @@ class _LoginScreenState extends State<LoginScreen> {
           _isLoading = false;
         });
 
-        // Parsear el token y el usuario de la respuesta
         final token = response['token'];
         final userJson = response['user'];
         final user = User.fromJson(userJson);
 
-        // Guardar el token y el usuario en SharedPreferences
         await apiService.saveToken(token);
-        await apiService.saveUser(user); // Guardar el usuario
+        await apiService.saveUser(user);
 
-        // Imprimir para verificar
-        print('Token recibido: $token');
-        print('Usuario guardado: ${user.name}');
-
-        // Redirige a la pantalla Home
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
@@ -65,7 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Validaciones
   String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {
       return 'El usuario no puede estar vacío';
@@ -86,90 +77,141 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Determinar si estamos en un dispositivo móvil o en la web
     bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 400),
-          child: Container(
-            height: isMobile
-                ? MediaQuery.of(context).size.height // Ocupa toda la pantalla en móvil
-                : 500, // Altura fija en la web
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xffffffff), Color(0xffffffff)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center, // Centra verticalmente
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 1), // Espacio adicional en la parte superior
-                  GestureDetector(
-                    onTap: _login,
-                    child: Image.asset(
-                      'assets/images/olivoFHsinfondo.png',
-                      height: 200,
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 600), // Tamaño reducido de ancho
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blueGrey, width: 1.5),
+                ),
+                padding: const EdgeInsets.all(16.0),
+                child: isMobile
+                    ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildImage(),
+                    SizedBox(height: 30), // Mantiene el alto original
+                    _buildForm(),
+                  ],
+                )
+                    : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: _buildImage(),
                     ),
-                  ),
-                  SizedBox(height: 30), // Espacio entre la imagen y los campos de texto
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Nombre de usuario',
-                      labelStyle: TextStyle(color: Color(0xff742d2d)),
-                      filled: true,
-                      fillColor: Colors.white24,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
+                    SizedBox(width: 30),
+                    Expanded(
+                      flex: 1,
+                      child: _buildForm(),
                     ),
-                    style: TextStyle(color: Color(0xff742d2d)),
-                    validator: _validateUsername,
-                  ),
-                  SizedBox(height: 15),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: 'Contraseña',
-                      labelStyle: TextStyle(color: Color(0xff742d2d)),
-                      filled: true,
-                      fillColor: Colors.white24,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    obscureText: true,
-                    style: TextStyle(color: Color(0xff742d2d)),
-                    validator: _validatePassword,
-                  ),
-                  SizedBox(height: 20),
-                  if (_isLoading)
-                    CircularProgressIndicator(color: Colors.purpleAccent),
-                  if (_errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: Text(
-                        _errorMessage!,
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildImage() {
+    return GestureDetector(
+      onTap: _login,
+      child: Image.asset(
+        'assets/images/olivoFHsinfondo.png',
+        height: 200, // Mantiene el alto original
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Center(
+            child: TextFormField(
+              controller: _nameController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                label: Center(
+                  child: Text(
+                    'Nombre de usuario',
+                    style: TextStyle(
+                      color: Color(0xff742d2d),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                filled: true,
+                fillColor: Colors.white24,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              style: TextStyle(color: Color(0xff742d2d)),
+              validator: _validateUsername,
+            ),
+          ),
+          SizedBox(height: 15),
+          Center(
+            child: TextFormField(
+              controller: _passwordController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                label: Center(
+                  child: Text(
+                    'Contraseña',
+                    style: TextStyle(
+                      color: Color(0xff742d2d),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                filled: true,
+                fillColor: Colors.white24,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              obscureText: true,
+              style: TextStyle(color: Color(0xff742d2d)),
+              validator: _validatePassword,
+            ),
+          ),
+          SizedBox(height: 20), // Mantiene el alto original
+          if (_isLoading)
+            Center(child: CircularProgressIndicator(color: Colors.purpleAccent)),
+          if (_errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
+        ],
       ),
     );
   }
