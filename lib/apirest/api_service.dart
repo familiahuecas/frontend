@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/numeracion.dart';
+import '../model/recaudaciones.dart';
 import '../model/recaudacionrequest.dart';
 import '../model/recaudacionresponse.dart';
 import '../model/user.dart';
@@ -41,7 +42,6 @@ class ApiService {
     return null;
   }
 
-  // Método POST con autenticación opcional
   Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body, {bool requiresAuth = true}) async {
     final url = Uri.parse('$baseUrl$endpoint');
     final token = requiresAuth ? await _getToken() : null;
@@ -59,18 +59,22 @@ class ApiService {
 
       print('Respuesta recibida: ${response.body}');
 
+      // Si la respuesta es exitosa, decodifica y retorna
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
-      } else {
-        throw Exception('Error: ${response.statusCode}');
       }
+
+      // Si no es exitosa, lanza un error con el mensaje del servidor
+      throw Exception('Error ${response.statusCode}: ${response.body}');
     } catch (e) {
       throw Exception('Error de red o del servidor: $e');
     }
   }
 
+
   // Método GET para obtener usuarios
   Future<List<User>> getUsers() async {
+    print('Haciendo llamada a: getUsers');
     final url = Uri.parse('$baseUrl/users/list');
     final token = await _getToken();
     print('Haciendo llamada a: $url');
@@ -206,4 +210,112 @@ class ApiService {
       throw Exception('Error de red o del servidor: $e');
     }
   }
+  Future<RecaudacionesPage> getRecaudaciones(int page, int size) async {
+    final url = Uri.parse('$baseUrl/numeracion/listrecaudacion?page=$page&size=$size');
+    final token = await _getToken();
+    print('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Mapea la respuesta JSON al modelo RecaudacionesPage
+        return RecaudacionesPage.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  // Método para obtener usuarios paginados
+  Future<UserPage> getUsersPaginated(int page, int size) async {
+    final url = Uri.parse('$baseUrl/users/listpaginated?page=$page&size=$size');
+    final token = await _getToken();
+    print('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Mapea la respuesta JSON al modelo UserPage
+        return UserPage.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  // Método para eliminar usuarios
+  Future<void> deleteUser(int id) async {
+    final url = Uri.parse('$baseUrl/users/delete/$id');
+    final token = await _getToken();
+    print('Haciendo llamada DELETE a: $url');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.statusCode}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Error al eliminar el usuario: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  Future<void> createUser(User user) async {
+    print('Preparando para guardar usuario: ${user.toJson()}');
+    final url = Uri.parse('$baseUrl/users/create');
+    final token = await _getToken(); // Obtener el token almacenado
+
+    print('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(user.toJson()), // Convertir el objeto User a JSON
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) { // Suponiendo que el backend responde con 200 para creación exitosa
+        print('Usuario guardado exitosamente');
+      } else {
+        throw Exception('Error al guardar el usuario: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al guardar el usuario: $e');
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+
+
 }

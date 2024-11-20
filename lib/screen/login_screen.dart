@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
+        // Realizar la petición
         final response = await apiService.post(
           '/auth/login',
           {
@@ -33,9 +34,10 @@ class _LoginScreenState extends State<LoginScreen> {
           requiresAuth: false,
         );
 
-        setState(() {
-          _isLoading = false;
-        });
+        // Validar que la respuesta tiene el token y el usuario
+        if (!response.containsKey('token') || !response.containsKey('user')) {
+          throw Exception('La respuesta no contiene los datos necesarios.');
+        }
 
         final token = response['token'];
         final userJson = response['user'];
@@ -51,11 +53,28 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         setState(() {
           _isLoading = false;
-          _errorMessage = e.toString();
+          _errorMessage = _parseErrorMessage(e.toString());
         });
       }
     }
   }
+
+
+  String _parseErrorMessage(String error) {
+    if (error.contains('401')) {
+      return 'Credenciales incorrectas. Por favor, verifica tu nombre de usuario y contraseña.';
+    } else if (error.contains('500')) {
+      return 'Error del servidor. Inténtalo de nuevo más tarde.';
+    } else if (error.contains('timeout')) {
+      return 'El servidor no responde. Verifica tu conexión a Internet.';
+    } else if (error.contains('La respuesta no contiene los datos necesarios')) {
+      return 'El servidor no devolvió los datos esperados. Inténtalo más tarde.';
+    } else {
+      return 'Ha ocurrido un error inesperado. Inténtalo de nuevo.';
+    }
+  }
+
+
 
   String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {

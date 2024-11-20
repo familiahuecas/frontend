@@ -50,33 +50,7 @@ class NumeracionPage extends Page<Numeracion> implements BaseModel{
   @override Map<String, dynamic> toJson() => _$NumeracionPageToJson(this);
 }
 
-/*@JsonSerializable()
-class NumeracionPage {
-  List<Numeracion> content;
-  Pageable pageable;
-  bool last;
-  int totalPages;
-  int totalElements;
-  bool first;
-  int size;
-  int number;
-  bool empty;
 
-  NumeracionPage({
-    required this.content,
-    required this.pageable,
-    required this.last,
-    required this.totalPages,
-    required this.totalElements,
-    required this.first,
-    required this.size,
-    required this.number,
-    required this.empty,
-  });
-
-  factory NumeracionPage.fromJson(Map<String, dynamic> json) => _$NumeracionPageFromJson(json);
-  Map<String, dynamic> toJson() => _$NumeracionPageToJson(this);
-}*/
 
 @JsonSerializable()
 class Pageable {

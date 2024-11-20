@@ -137,14 +137,7 @@ class _HacerRecaudacionScreenState extends State<HacerRecaudacionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Por favor, ingresa los datos:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
-              ),
-            ),
+
             SizedBox(height: 20),
             // Encabezado para Unidesa
             Text(
@@ -189,21 +182,35 @@ class _HacerRecaudacionScreenState extends State<HacerRecaudacionScreen> {
             ),
             SizedBox(height: 30),
             Center(
-              child: ElevatedButton(
+              child: TextButton(
                 onPressed: _onAceptarPressed,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 80),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.blueAccent, width: 1.5),
                   ),
+                  elevation: 5,
                 ),
-                child: Text(
-                  'Aceptar',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.blueAccent, size: 32),
+                    SizedBox(height: 8),
+                    Text(
+                      'Aceptar',
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+            )
+
           ],
         ),
       ),
