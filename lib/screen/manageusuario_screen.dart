@@ -1,3 +1,4 @@
+import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
 import 'package:flutter/material.dart';
 import '../model/user.dart';
 import '../apirest/api_service.dart';
@@ -154,9 +155,8 @@ class _ManageUsuarioScreenState extends State<ManageUsuarioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.user == null ? 'Crear Usuario' : 'Editar Usuario'),
-      ),
+
+      appBar: CommonHeader(title: widget.user == null ? 'Crear Usuario' : 'Editar Usuario'),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(

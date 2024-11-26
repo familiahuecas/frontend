@@ -3,8 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final bool showBackButton; // Nueva propiedad para controlar la visibilidad del botón de volver
 
-  CommonHeader({required this.title});
+  const CommonHeader({Key? key, required this.title, this.showBackButton = true}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,6 +13,7 @@ class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.white, // Fondo blanco para un diseño limpio
       elevation: 2, // Sombra sutil para el AppBar
       centerTitle: true,
+      automaticallyImplyLeading: showBackButton, // Controla si se muestra el botón
       title: Text(
         'FH - $title',
         style: TextStyle(

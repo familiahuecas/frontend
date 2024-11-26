@@ -88,8 +88,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'La contraseña no puede estar vacía';
-    } else if (value.length < 6) {
-      return 'La contraseña debe tener al menos 6 caracteres';
+    } else if (value.length < 5) {
+      return 'La contraseña debe tener al menos 5 caracteres';
     }
     return null;
   }

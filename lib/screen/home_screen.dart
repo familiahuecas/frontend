@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../apirest/api_service.dart';
 import '../model/user.dart';
 import 'documentos.dart';
+import 'documentos.dart';
 import 'gestion.dart';
 import 'maquinas.dart';
 
@@ -45,7 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonHeader(title: 'Home'), // Usa CommonHeader aquí
+      appBar: CommonHeader(
+        title: 'Home',
+        showBackButton: false, // No muestra la flecha de volver
+      ),
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.width * 0.85,
@@ -207,6 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
+
                     ],
                   ),
                 ),

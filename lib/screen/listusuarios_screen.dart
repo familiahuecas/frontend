@@ -90,58 +90,174 @@ class _ListUsuariosScreenState extends State<ListUsuariosScreen> {
   }
 
   Widget _buildUserCard(User user) {
-    return Card(
-      color: Colors.blueGrey[50],
-      elevation: 4,
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Padding(
-        padding: EdgeInsets.all(12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Usuario: ${user.name}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+    return Center(
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: 600, // Limita el ancho para pantallas grandes
+        ),
+        child: Card(
+          color: Colors.white, // Fondo blanco para la tarjeta
+          elevation: 6,
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.person, color: Colors.blue, size: 24),
+                        SizedBox(width: 8),
+                        Text(
+                          user.name ?? 'Desconocido',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey[800],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Email: ${user.email},\nHabilitado: ${user.enabled ? "Sí" : "No"}\n'
-                        'Roles: ${user.roles?.join(", ")}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(Icons.email, color: Colors.orange),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            user.email ?? 'No disponible',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: 8),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Habilitado: ',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          TextSpan(
+                            text: user.enabled ? "Sí" : "No",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: user.enabled ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Roles:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueGrey[800],
+                      ),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: user.roles?.map((role) {
+                        Color roleColor;
+                        switch (role) {
+                          case 'SUPERADMIN':
+                            roleColor = Colors.red;
+                            break;
+                          case 'ADMIN':
+                            roleColor = Colors.orange;
+                            break;
+                          case 'CLIENTE':
+                            roleColor = Colors.green;
+                            break;
+                          default:
+                            roleColor = Colors.grey;
+                        }
+                        return Chip(
+                          label: Text(
+                            role,
+                            style: TextStyle(
+                              color: roleColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          backgroundColor: Colors.white,
+                          shape: StadiumBorder(
+                            side: BorderSide(color: roleColor, width: 1.5),
+                          ),
+                        );
+                      }).toList() ??
+                          [Chip(label: Text('Sin roles asignados'))],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              icon: Icon(Icons.edit, color: Colors.blue),
-              onPressed: () => _navigateToEditUser(user),
-            ),
-
-            IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _showDeleteConfirmationDialog(user.id),
-            ),
-          ],
+              Positioned(
+                top: 8,
+                right: 8,
+                child: PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: Colors.grey),
+                  onSelected: (String value) {
+                    switch (value) {
+                      case 'edit':
+                        _navigateToEditUser(user);
+                        break;
+                      case 'delete':
+                        _showDeleteConfirmationDialog(user.id);
+                        break;
+                    }
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text('Editar'),
+                          ],
+                        ),
+                      ),
+                     /* PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Eliminar'),
+                          ],
+                        ),
+                      ),*/
+                    ];
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonHeader(title: 'Usuarios'),
+      appBar: CommonHeader(title: 'Usuarios-Listado'),
       body: isLoading && users.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
