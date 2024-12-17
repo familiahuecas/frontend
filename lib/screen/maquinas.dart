@@ -32,19 +32,19 @@ class MaquinasScreen extends StatelessWidget {
                     minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blueGrey, width: 1.5),
+                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
                     ),
                     elevation: 5,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.monetization_on, color: Colors.blueGrey, size: 32),
+                      Icon(Icons.monetization_on, color: Colors.blue[900]!, size: 32),
                       SizedBox(height: 8),
                       Text(
                         'Hacer Recaudación',
                         style: TextStyle(
-                          color: Colors.blueGrey,
+                          color: Colors.blue[900]!,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -66,19 +66,19 @@ class MaquinasScreen extends StatelessWidget {
                     minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.teal, width: 1.5),
+                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
                     ),
                     elevation: 5,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.history, color: Colors.teal, size: 32),
+                      Icon(Icons.history, color: Colors.blue[900]!, size: 32),
                       SizedBox(height: 8),
                       Text(
                         'Histórico de Recaudaciones',
                         style: TextStyle(
-                          color: Colors.teal,
+                          color: Colors.blue[900]!,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -100,19 +100,19 @@ class MaquinasScreen extends StatelessWidget {
                     minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.deepOrange, width: 1.5),
+                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
                     ),
                     elevation: 5,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.format_list_numbered, color: Colors.deepOrange, size: 32),
+                      Icon(Icons.format_list_numbered, color: Colors.blue[900]!, size: 32),
                       SizedBox(height: 8),
                       Text(
                         'Numeraciones',
                         style: TextStyle(
-                          color: Colors.deepOrange,
+                          color: Colors.blue[900]!,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart'; // Importar la librería de permisos
 import '../apirest/api_service.dart';
 import '../model/user.dart';
 import 'home_screen.dart';
@@ -46,34 +47,56 @@ class _LoginScreenState extends State<LoginScreen> {
         await apiService.saveToken(token);
         await apiService.saveUser(user);
 
+        // Solicitar permisos antes de navegar a la pantalla principal
+        final hasPermission = await _requestStoragePermission();
+        if (!hasPermission) {
+          throw Exception('Permisos de almacenamiento denegados.');
+        }
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
         );
-      } catch (e) {
+      } catch (e, stackTrace) {
         setState(() {
           _isLoading = false;
-          _errorMessage = _parseErrorMessage(e.toString());
+          _errorMessage = _parseErrorMessage(e.toString(), stackTrace); // Envía también el StackTrace
         });
+        print('Error al iniciar sesión: $e');
+        print('StackTrace: $stackTrace');
+        // Imprime el error en la consola para mayor detalle
+        print('Error al iniciar sesión: $e');
+        print('StackTrace: $stackTrace');
       }
+
     }
   }
 
+  Future<bool> _requestStoragePermission() async {
+    final status = await Permission.storage.request();
+    return status.isGranted;
+  }
 
-  String _parseErrorMessage(String error) {
+  String _parseErrorMessage(String error, [StackTrace? stackTrace]) {
     if (error.contains('401')) {
       return 'Credenciales incorrectas. Por favor, verifica tu nombre de usuario y contraseña.';
     } else if (error.contains('500')) {
       return 'Error del servidor. Inténtalo de nuevo más tarde.';
     } else if (error.contains('timeout')) {
       return 'El servidor no responde. Verifica tu conexión a Internet.';
+    } else if (error.contains('Permisos de almacenamiento denegados')) {
+      return 'Por favor, concede permisos de almacenamiento para continuar.';
     } else if (error.contains('La respuesta no contiene los datos necesarios')) {
       return 'El servidor no devolvió los datos esperados. Inténtalo más tarde.';
     } else {
-      return 'Ha ocurrido un error inesperado. Inténtalo de nuevo.';
+      // Si ocurre un error inesperado, devuelve el mensaje completo y la traza
+      String detailedError = 'Error inesperado: $error';
+      if (stackTrace != null) {
+        detailedError += '\nStackTrace:\n$stackTrace';
+      }
+      return detailedError;
     }
   }
-
 
 
   String? _validateUsername(String? value) {

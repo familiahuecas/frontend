@@ -1,12 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Permiso para usar Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
 
     <application
-        android:label="familiahuecasfrontend"
+        android:label="FH"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"> <!-- Permitir tráfico HTTP sin cifrar -->
+        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
+        > <!-- Permitir tráfico HTTP sin cifrar -->
 
         <activity
             android:name=".MainActivity"

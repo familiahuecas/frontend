@@ -31,19 +31,19 @@ class UsuariosScreen extends StatelessWidget {
                     minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue, width: 1.5),
+                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
                     ),
                     elevation: 5,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.list, color: Colors.blue, size: 32),
+                      Icon(Icons.list, color: Colors.blue[900]!, size: 32),
                       SizedBox(height: 8),
                       Text(
                         'Listado Usuarios',
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: Colors.blue[900]!,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -65,19 +65,19 @@ class UsuariosScreen extends StatelessWidget {
                     minimumSize: Size(double.infinity, 80),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.green, width: 1.5),
+                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
                     ),
                     elevation: 5,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.person_add, color: Colors.green, size: 32),
+                      Icon(Icons.person_add, color: Colors.blue[900]!, size: 32),
                       SizedBox(height: 8),
                       Text(
                         'Crear Usuario',
                         style: TextStyle(
-                          color: Colors.green,
+                          color: Colors.blue[900]!,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),

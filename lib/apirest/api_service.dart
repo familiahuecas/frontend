@@ -1,10 +1,12 @@
 import 'dart:io';
 
+//import 'package:dio/dio.dart';
+//import 'package:file_saver/file_saver.dart';
 import 'package:dio/dio.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,6 +20,16 @@ import '../model/user.dart';
 import '../model/usuarioconadelanto.dart';
 import '../model/usuarioconapuntes.dart';
 import 'package:mime/mime.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+
+
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
+import 'api_client.dart';
+
 
 //import 'download_file_service.dart';
 //import 'dart:html' as html; // Para la web
@@ -27,7 +39,13 @@ class ApiService {
   final String baseUrl = kIsWeb
       ? '${const String.fromEnvironment('API_URL_WEB')}/backend'  // URL para la web
       : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el teléfono
-  //final DownloadFileService _downloadFileService = DownloadFileService();
+
+
+  late Dio _dio;
+
+  ApiService() {
+    _dio = ApiClient.createDio(); // Usa la configuración personalizada
+  }
   // Método para obtener el token
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -536,6 +554,41 @@ class ApiService {
       throw Exception('Error de red o del servidor: $e');
     }
   }
+  Future<void> uploadFileWeb(Uint8List bytes, String fileName, int parentId) async {
+    try {
+      final url = Uri.parse('$baseUrl/documentos/upload?parentId=$parentId');
+      final token = await _getToken();
+
+      print('URL de subida: $url');
+      print('Iniciando subida del archivo: $fileName');
+      print('Tamaño del archivo: ${bytes.length} bytes');
+      print('Parent ID: $parentId');
+
+      final request = http.MultipartRequest('POST', url)
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: fileName,
+          contentType: MediaType('application', 'octet-stream'), // Ajusta el tipo MIME si es necesario
+        ));
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('Código de respuesta: ${response.statusCode}');
+      if (response.statusCode != 200) {
+        print('Error al subir el archivo: ${response.body}');
+        throw Exception('Error al subir el archivo: ${response.body}');
+      }
+
+      print('Archivo subido exitosamente');
+    } catch (e) {
+      print('Error en la subida del archivo: $e');
+      throw Exception('Error al subir el archivo (Web): $e');
+    }
+  }
+
 // Método para subir un archivo
   Future<void> uploadFile(String filePath, int parentId) async {
     final url = Uri.parse('$baseUrl/documentos/upload?parentId=$parentId');
@@ -556,38 +609,111 @@ class ApiService {
       throw Exception('Error de red o del servidor: $e');
     }
   }
+
+
+
   Future<void> downloadFile(int id, String fileName) async {
     final url = '$baseUrl/documentos/download/$id';
-    final token = await _getToken(); // Obtén el token JWT de tu lógica
+    final token = await _getToken();
 
     try {
-      // Descarga el archivo como bytes
-      final response = await Dio().get(
-        url,
-        options: Options(
-          responseType: ResponseType.bytes,
-          headers: {
-            'Authorization': 'Bearer $token', // Agrega el token a los headers
-          },
-        ),
+      print('Iniciando descarga desde: $url');
+
+      // Descargar el archivo
+      await FileDownloader.downloadFile(
+        url: url,
+        name: fileName,
+        headers: {'Authorization': 'Bearer $token'},
+        downloadDestination: DownloadDestinations.publicDownloads, // Carpeta pública Download
+        notificationType: NotificationType.all, // Mostrar progreso y éxito
+        onProgress: (fileName, progress) {
+          print('Progreso de descarga: $progress%');
+        },
+        onDownloadCompleted: (path) {
+          print('Archivo descargado exitosamente en: $path');
+        },
+        onDownloadError: (error) {
+          print('Error en la descarga: $error');
+        },
       );
-
-      if (response.statusCode == 200) {
-        final mimeType = lookupMimeType(fileName) ?? 'application/octet-stream';
-
-        // Guarda el archivo con FileSaver
-        await FileSaver.instance.saveFile(
-          fileName,
-          Uint8List.fromList(response.data),
-          mimeType.split('/').last, // Extensión del archivo
-        );
-      } else {
-        throw Exception('Error al descargar el archivo: ${response.statusCode}');
-      }
     } catch (e) {
+      print('Excepción capturada: $e');
       throw Exception('Error al descargar el archivo: $e');
     }
   }
+
+// Método para notificar al sistema sobre el nuevo archivo
+  Future<void> _notifySystemAboutDownload(String filePath, String mimeType) async {
+    try {
+      final fileUri = Uri.file(filePath);
+
+      // Usa `android.intent.action.MEDIA_SCANNER_SCAN_FILE` para indexar el archivo
+      final intent = AndroidIntent(
+        action: 'android.intent.action.MEDIA_SCANNER_SCAN_FILE',
+        data: fileUri.toString(),
+      );
+
+      await intent.launch();
+      print('Sistema notificado sobre el archivo: $filePath');
+    } catch (e) {
+      print('Error notificando al sistema: $e');
+    }
+  }
+
+
+  /* Future<void> downloadFileWeb(int id, String fileName) async {
+    final url = '$baseUrl/documentos/download/$id';
+    final token = await _getToken();
+
+    try {
+      print('Iniciando descarga desde: $url');
+
+      // Crea un objeto de solicitud para la descarga
+      final request = html.HttpRequest();
+      request
+        ..open('GET', url)
+        ..setRequestHeader('Authorization', 'Bearer $token')
+        ..responseType = 'blob';
+
+      request.onLoad.listen((event) {
+        if (request.status == 200) {
+          print('Código de respuesta: ${request.status}');
+
+          // Crea un enlace temporal para iniciar la descarga
+          final blob = request.response; // Contenido del archivo
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..target = 'blank'
+            ..download = fileName;
+
+          // Agrega el enlace al DOM y simula un clic
+          html.document.body?.append(anchor);
+          anchor.click();
+          anchor.remove();
+
+          // Libera la URL creada
+          html.Url.revokeObjectUrl(url);
+
+          print('Archivo descargado exitosamente: $fileName');
+        } else {
+          print('Error en la descarga: Código: ${request.status}');
+          throw Exception('Error al descargar el archivo: ${request.status}');
+        }
+      });
+
+      request.onError.listen((event) {
+        print('Error en la solicitud HTTP: ${request.status}');
+        throw Exception('Error al descargar el archivo: ${request.status}');
+      });
+
+      request.send();
+    } catch (e) {
+      print('Excepción capturada durante la descarga: $e');
+      throw Exception('Error al descargar el archivo: $e');
+    }
+  }*/
+
+
 
 
 
@@ -620,7 +746,7 @@ class ApiService {
       print('Enviando solicitud a: $url');
       print('Datos enviados: $folderData');
 
-      final response = await Dio().post(
+      final response = await _dio.post(
         url,
         data: folderData,
         options: Options(
@@ -650,9 +776,9 @@ class ApiService {
   Future<void> deleteFolder(int parentId, int childId) async {
     final url = '$baseUrl/documentos/$parentId/remove-child/$childId';
     final token = await _getToken();
-
+    print('Enviando solicitud a: $url');
     try {
-      final response = await Dio().delete(
+      final response = await _dio.delete(
         url,
         options: Options(
           headers: {
@@ -668,6 +794,28 @@ class ApiService {
     } catch (e) {
       print('Error al eliminar la carpeta: $e');
       rethrow;
+    }
+  }
+  Future<void> deleteDocument(int id) async {
+    final url = '$baseUrl/documentos/delete/$id';
+    final token = await _getToken();
+    print('Enviando solicitud a: $url');
+    try {
+      final response = await _dio.delete(
+        url,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      print('Respuesta recibida: ${response}');
+      if (response.statusCode != 200) {
+        throw Exception('Error al eliminar el documento: ${response.data}');
+      }
+    } catch (e) {
+      throw Exception('Error al eliminar el documento: $e');
     }
   }
 

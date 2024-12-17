@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
               : Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Saludo al usuario fuera de la columna de los botones
+              // Saludo al usuario
               Text(
                 'Bienvenido, ${currentUser!.name}',
                 style: TextStyle(
@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.blueGrey,
                 ),
               ),
-              SizedBox(height: 24), // Espacio entre el saludo y los botones
+              SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -89,19 +89,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           minimumSize: Size(double.infinity, 80),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Color(0xFFFFB74D), width: 1.5), // Naranja pastel
+                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
                           ),
                           elevation: 5,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.person, color: Color(0xFFFFB74D), size: 32), // Naranja pastel
+                            Icon(Icons.person, color: Colors.blue[900], size: 32), // Azul marino
                             SizedBox(height: 8),
                             Text(
                               'Usuarios',
                               style: TextStyle(
-                                color: Color(0xFFFFB74D), // Naranja pastel
+                                color: Colors.blue[900], // Azul marino
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -123,19 +123,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           minimumSize: Size(double.infinity, 80),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Color(0xFFA5D6A7), width: 1.5), // Verde pastel
+                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
                           ),
                           elevation: 5,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.settings, color: Color(0xFFA5D6A7), size: 32), // Verde pastel
+                            Icon(Icons.settings, color: Colors.blue[900], size: 32), // Azul marino
                             SizedBox(height: 8),
                             Text(
                               'Gestión',
                               style: TextStyle(
-                                color: Color(0xFFA5D6A7), // Verde pastel
+                                color: Colors.blue[900], // Azul marino
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -157,19 +157,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           minimumSize: Size(double.infinity, 80),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Color(0xFF81D4FA), width: 1.5), // Azul pastel
+                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
                           ),
                           elevation: 5,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.computer, color: Color(0xFF81D4FA), size: 32), // Azul pastel
+                            Icon(Icons.computer, color: Colors.blue[900], size: 32), // Azul marino
                             SizedBox(height: 8),
                             Text(
                               'Máquinas',
                               style: TextStyle(
-                                color: Color(0xFF81D4FA), // Azul pastel
+                                color: Colors.blue[900], // Azul marino
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -191,19 +191,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           minimumSize: Size(double.infinity, 80),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Color(0xFFCE93D8), width: 1.5), // Morado pastel
+                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
                           ),
                           elevation: 5,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.folder, color: Color(0xFFCE93D8), size: 32), // Morado pastel
+                            Icon(Icons.folder, color: Colors.blue[900], size: 32), // Azul marino
                             SizedBox(height: 8),
                             Text(
                               'Documentos',
                               style: TextStyle(
-                                color: Color(0xFFCE93D8), // Morado pastel
+                                color: Colors.blue[900], // Azul marino
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -211,7 +211,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-
                     ],
                   ),
                 ),
@@ -220,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+
     );
   }
 }

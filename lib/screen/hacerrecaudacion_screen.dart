@@ -189,19 +189,19 @@ class _HacerRecaudacionScreenState extends State<HacerRecaudacionScreen> {
                   minimumSize: Size(double.infinity, 80),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.blueAccent, width: 1.5),
+                    side: BorderSide(color: Colors.blue[900]!, width: 1.5),
                   ),
                   elevation: 5,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle, color: Colors.blueAccent, size: 32),
+                    Icon(Icons.check_circle, color: Colors.blue[900]!, size: 32),
                     SizedBox(height: 8),
                     Text(
                       'Aceptar',
                       style: TextStyle(
-                        color: Colors.blueAccent,
+                        color: Colors.blue[900]!,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
