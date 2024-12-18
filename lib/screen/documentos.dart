@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 
 import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
 
-import 'document_tree_screen_movil.dart';
+import 'document_tree_explorer_web.dart';
+import 'document_tree_screen_web.dart';
+import 'dart:html' as html;
+//import 'document_tree_screen_movil.dart';
 
 
 class DocumentosScreen extends StatelessWidget {
@@ -25,14 +28,26 @@ class DocumentosScreen extends StatelessWidget {
 
 
                 TextButton(
-                  onPressed: () {
+                 /* onPressed: () {
                     Navigator.push(
                       context,
                         MaterialPageRoute(
                           builder: (context) => kIsWeb
-                              ? const DocumentTreeScreenMobile()
-                              : const DocumentTreeScreenMobile(),
+                              ? const DocumentTreeExplorerWeb()
+                              : const DocumentTreeScreenWeb(),
                         )
+                    );
+                  },*/
+                  onPressed: () {
+                    final width = html.window.innerWidth;
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => width! <= 768
+                            ? const DocumentTreeScreenWeb() // Móvil (pantallas pequeñas)
+                            : const DocumentTreeExplorerWeb(), // Escritorio (pantallas grandes)
+                      ),
                     );
                   },
                   style: TextButton.styleFrom(

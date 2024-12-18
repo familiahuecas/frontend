@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart'; // Importar la librería de permisos
 import '../apirest/api_service.dart';
 import '../model/user.dart';
 import 'home_screen.dart';
@@ -25,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        // Realizar la petición
         final response = await apiService.post(
           '/auth/login',
           {
@@ -35,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
           requiresAuth: false,
         );
 
-        // Validar que la respuesta tiene el token y el usuario
         if (!response.containsKey('token') || !response.containsKey('user')) {
           throw Exception('La respuesta no contiene los datos necesarios.');
         }
@@ -47,12 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
         await apiService.saveToken(token);
         await apiService.saveUser(user);
 
-        // Solicitar permisos antes de navegar a la pantalla principal
-        final hasPermission = await _requestStoragePermission();
-        if (!hasPermission) {
-          throw Exception('Permisos de almacenamiento denegados.');
-        }
-
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
@@ -60,44 +51,21 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e, stackTrace) {
         setState(() {
           _isLoading = false;
-          _errorMessage = _parseErrorMessage(e.toString(), stackTrace); // Envía también el StackTrace
+          _errorMessage = _parseErrorMessage(e.toString(), stackTrace);
         });
         print('Error al iniciar sesión: $e');
         print('StackTrace: $stackTrace');
-        // Imprime el error en la consola para mayor detalle
-        print('Error al iniciar sesión: $e');
-        print('StackTrace: $stackTrace');
       }
-
     }
-  }
-
-  Future<bool> _requestStoragePermission() async {
-    final status = await Permission.storage.request();
-    return status.isGranted;
   }
 
   String _parseErrorMessage(String error, [StackTrace? stackTrace]) {
     if (error.contains('401')) {
-      return 'Credenciales incorrectas. Por favor, verifica tu nombre de usuario y contraseña.';
-    } else if (error.contains('500')) {
-      return 'Error del servidor. Inténtalo de nuevo más tarde.';
-    } else if (error.contains('timeout')) {
-      return 'El servidor no responde. Verifica tu conexión a Internet.';
-    } else if (error.contains('Permisos de almacenamiento denegados')) {
-      return 'Por favor, concede permisos de almacenamiento para continuar.';
-    } else if (error.contains('La respuesta no contiene los datos necesarios')) {
-      return 'El servidor no devolvió los datos esperados. Inténtalo más tarde.';
+      return 'Credenciales incorrectas. Verifica tu usuario y contraseña.';
     } else {
-      // Si ocurre un error inesperado, devuelve el mensaje completo y la traza
-      String detailedError = 'Error inesperado: $error';
-      if (stackTrace != null) {
-        detailedError += '\nStackTrace:\n$stackTrace';
-      }
-      return detailedError;
+      return 'Error inesperado: $error';
     }
   }
-
 
   String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {
@@ -126,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 600), // Tamaño reducido de ancho
+            constraints: BoxConstraints(maxWidth: 600),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
@@ -142,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _buildImage(),
-                    SizedBox(height: 30), // Mantiene el alto original
+                    SizedBox(height: 30),
                     _buildForm(),
                   ],
                 )
@@ -174,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onTap: _login,
       child: Image.asset(
         'assets/images/olivoFHsinfondo.png',
-        height: 200, // Mantiene el alto original
+        height: 200,
         fit: BoxFit.contain,
       ),
     );
@@ -191,26 +159,10 @@ class _LoginScreenState extends State<LoginScreen> {
             child: TextFormField(
               controller: _nameController,
               textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                label: Center(
-                  child: Text(
-                    'Nombre de usuario',
-                    style: TextStyle(
-                      color: Color(0xff742d2d),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                filled: true,
-                fillColor: Colors.white24,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+              decoration: _inputDecoration('Nombre de usuario'),
               style: TextStyle(color: Color(0xff742d2d)),
               validator: _validateUsername,
+              onFieldSubmitted: (_) => _login(), // Captura "Enter"
             ),
           ),
           SizedBox(height: 15),
@@ -218,30 +170,14 @@ class _LoginScreenState extends State<LoginScreen> {
             child: TextFormField(
               controller: _passwordController,
               textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                label: Center(
-                  child: Text(
-                    'Contraseña',
-                    style: TextStyle(
-                      color: Color(0xff742d2d),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                filled: true,
-                fillColor: Colors.white24,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+              decoration: _inputDecoration('Contraseña'),
               obscureText: true,
               style: TextStyle(color: Color(0xff742d2d)),
               validator: _validatePassword,
+              onFieldSubmitted: (_) => _login(), // Captura "Enter"
             ),
           ),
-          SizedBox(height: 20), // Mantiene el alto original
+          SizedBox(height: 20),
           if (_isLoading)
             Center(child: CircularProgressIndicator(color: Colors.purpleAccent)),
           if (_errorMessage != null)
@@ -254,6 +190,27 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      label: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: Color(0xff742d2d),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      filled: true,
+      fillColor: Colors.white24,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: BorderSide.none,
       ),
     );
   }

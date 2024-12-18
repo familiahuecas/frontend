@@ -1,8 +1,8 @@
 import 'package:animated_tree_view/animated_tree_view.dart';
+import 'package:familiahuecasfrontend/apirest/api_service.dart';
+import 'package:familiahuecasfrontend/model/exportable.dart';
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
-import '../apirest/api_service.dart';
-import '../model/exportable.dart';
 
 class DocumentTreeScreenMobile extends StatefulWidget {
   const DocumentTreeScreenMobile({super.key});
@@ -211,7 +211,7 @@ class _DocumentTreeScreenMobileState extends State<DocumentTreeScreenMobile> {
                           );
 
                           // Llama al servicio de descarga
-                          await _apiService.downloadFile(explorable.id, explorable.name);
+                     //     await _apiService.downloadFile(explorable.id, explorable.name);
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Archivo descargado: ${explorable.name}')),

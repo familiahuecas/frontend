@@ -32,7 +32,7 @@ import 'api_client.dart';
 
 
 //import 'download_file_service.dart';
-//import 'dart:html' as html; // Para la web
+import 'dart:html' as html; // Para la web
 
 
 class ApiService {
@@ -40,12 +40,12 @@ class ApiService {
       ? '${const String.fromEnvironment('API_URL_WEB')}/backend'  // URL para la web
       : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el teléfono
 
-
-  late Dio _dio;
+//esto es para movil
+ /* late Dio _dio;
 
   ApiService() {
     _dio = ApiClient.createDio(); // Usa la configuración personalizada
-  }
+  }*/
   // Método para obtener el token
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -612,7 +612,7 @@ class ApiService {
 
 
 
-  Future<void> downloadFile(int id, String fileName) async {
+/*  Future<void> downloadFile(int id, String fileName) async {
     final url = '$baseUrl/documentos/download/$id';
     final token = await _getToken();
 
@@ -640,28 +640,10 @@ class ApiService {
       print('Excepción capturada: $e');
       throw Exception('Error al descargar el archivo: $e');
     }
-  }
-
-// Método para notificar al sistema sobre el nuevo archivo
-  Future<void> _notifySystemAboutDownload(String filePath, String mimeType) async {
-    try {
-      final fileUri = Uri.file(filePath);
-
-      // Usa `android.intent.action.MEDIA_SCANNER_SCAN_FILE` para indexar el archivo
-      final intent = AndroidIntent(
-        action: 'android.intent.action.MEDIA_SCANNER_SCAN_FILE',
-        data: fileUri.toString(),
-      );
-
-      await intent.launch();
-      print('Sistema notificado sobre el archivo: $filePath');
-    } catch (e) {
-      print('Error notificando al sistema: $e');
-    }
-  }
+  }*/
 
 
-  /* Future<void> downloadFileWeb(int id, String fileName) async {
+   Future<void> downloadFileWeb(int id, String fileName) async {
     final url = '$baseUrl/documentos/download/$id';
     final token = await _getToken();
 
@@ -711,7 +693,7 @@ class ApiService {
       print('Excepción capturada durante la descarga: $e');
       throw Exception('Error al descargar el archivo: $e');
     }
-  }*/
+  }
 
 
 
@@ -746,7 +728,7 @@ class ApiService {
       print('Enviando solicitud a: $url');
       print('Datos enviados: $folderData');
 
-      final response = await _dio.post(
+      final response = await Dio().post(
         url,
         data: folderData,
         options: Options(
@@ -778,7 +760,7 @@ class ApiService {
     final token = await _getToken();
     print('Enviando solicitud a: $url');
     try {
-      final response = await _dio.delete(
+      final response = await Dio().delete(
         url,
         options: Options(
           headers: {
@@ -801,7 +783,7 @@ class ApiService {
     final token = await _getToken();
     print('Enviando solicitud a: $url');
     try {
-      final response = await _dio.delete(
+      final response = await Dio().delete(
         url,
         options: Options(
           headers: {
