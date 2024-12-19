@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 //import 'package:dio/dio.dart';
 //import 'package:file_saver/file_saver.dart';
@@ -556,6 +558,7 @@ class ApiService {
   }
   Future<void> uploadFileWeb(Uint8List bytes, String fileName, int parentId) async {
     try {
+      // Construcción de la URL
       final url = Uri.parse('$baseUrl/documentos/upload?parentId=$parentId');
       final token = await _getToken();
 
@@ -564,15 +567,21 @@ class ApiService {
       print('Tamaño del archivo: ${bytes.length} bytes');
       print('Parent ID: $parentId');
 
+      // Determinamos el tipo MIME basado en la extensión del archivo
+      final mimeType = _determineMimeType(fileName);
+      print('Tipo MIME detectado: $mimeType');
+
+      // Construcción de la solicitud
       final request = http.MultipartRequest('POST', url)
         ..headers['Authorization'] = 'Bearer $token'
         ..files.add(http.MultipartFile.fromBytes(
           'file',
           bytes,
           filename: fileName,
-          contentType: MediaType('application', 'octet-stream'), // Ajusta el tipo MIME si es necesario
+          contentType: MediaType.parse(mimeType), // Tipo MIME dinámico
         ));
 
+      // Enviar la solicitud
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
@@ -588,6 +597,38 @@ class ApiService {
       throw Exception('Error al subir el archivo (Web): $e');
     }
   }
+  String _determineMimeType(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'bmp':
+        return 'image/bmp';
+      case 'tiff':
+      case 'tif':
+        return 'image/tiff';
+      case 'webp':
+        return 'image/webp';
+      case 'pdf':
+        return 'application/pdf';
+      case 'txt':
+        return 'text/plain';
+      case 'csv':
+        return 'text/csv';
+      case 'json':
+        return 'application/json';
+      case 'xml':
+        return 'application/xml';
+      default:
+        return 'application/octet-stream'; // Tipo MIME genérico
+    }
+  }
+
 
 // Método para subir un archivo
   Future<void> uploadFile(String filePath, int parentId) async {
@@ -695,6 +736,41 @@ class ApiService {
     }
   }
 
+  Future<Uint8List> fetchFileContent(int id) async {
+    final url = '$baseUrl/documentos/download/$id';
+    final token = await _getToken();
+
+    try {
+      final request = html.HttpRequest();
+      request
+        ..open('GET', url)
+        ..setRequestHeader('Authorization', 'Bearer $token')
+        ..responseType = 'arraybuffer';
+
+      final completer = Completer<Uint8List>();
+
+      request.onLoad.listen((event) {
+        if (request.status == 200) {
+          final buffer = request.response as ByteBuffer;
+          completer.complete(Uint8List.view(buffer));
+        } else {
+          completer.completeError(
+              Exception('Error al descargar el archivo: ${request.status}'));
+        }
+      });
+
+      request.onError.listen((event) {
+        completer.completeError(
+            Exception('Error en la solicitud HTTP: ${request.status}'));
+      });
+
+      request.send();
+
+      return completer.future;
+    } catch (e) {
+      throw Exception('Error al obtener el contenido del archivo: $e');
+    }
+  }
 
 
 
