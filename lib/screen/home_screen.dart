@@ -1,3 +1,4 @@
+import 'package:familiahuecasfrontend/screen/ubicacion.dart';
 import 'package:familiahuecasfrontend/screen/user.dart';
 import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
 import 'package:flutter/material.dart';
@@ -211,8 +212,43 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
+                      SizedBox(height: 16),
+                      // Botón "Documentos"
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => UbicacionScreen()),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          minimumSize: Size(double.infinity, 80),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
+                          ),
+                          elevation: 5,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.map, color: Colors.blue[900], size: 32), // Azul marino
+                            SizedBox(height: 8),
+                            Text(
+                              'Ubicaciones',
+                              style: TextStyle(
+                                color: Colors.blue[900], // Azul marino
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
+
                 ),
               ),
             ],

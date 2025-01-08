@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart'; // Importar la libr
 import '../apirest/api_service.dart';
 import '../model/user.dart';
 import 'home_screen.dart';
+import 'dart:io';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -25,6 +26,12 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
+        // Verificar permisos requeridos
+        final hasPermissions = await _requestPermissions();
+        if (!hasPermissions) {
+          throw Exception('Permisos necesarios no concedidos.');
+        }
+
         // Realizar la petición
         final response = await apiService.post(
           '/auth/login',
@@ -47,12 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
         await apiService.saveToken(token);
         await apiService.saveUser(user);
 
-        // Solicitar permisos antes de navegar a la pantalla principal
-        final hasPermission = await _requestStoragePermission();
-        if (!hasPermission) {
-          throw Exception('Permisos de almacenamiento denegados.');
-        }
-
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
@@ -60,21 +61,32 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e, stackTrace) {
         setState(() {
           _isLoading = false;
-          _errorMessage = _parseErrorMessage(e.toString(), stackTrace); // Envía también el StackTrace
+          _errorMessage = _parseErrorMessage(e.toString(), stackTrace);
         });
         print('Error al iniciar sesión: $e');
         print('StackTrace: $stackTrace');
-        // Imprime el error en la consola para mayor detalle
-        print('Error al iniciar sesión: $e');
-        print('StackTrace: $stackTrace');
       }
-
     }
   }
 
-  Future<bool> _requestStoragePermission() async {
-    final status = await Permission.storage.request();
-    return status.isGranted;
+  Future<bool> _requestPermissions() async {
+    // Manejo de permisos para almacenamiento y ubicación
+    bool hasStoragePermission = true;
+    bool hasLocationPermission = true;
+
+    if (Platform.isAndroid) {
+      // Solicitar permisos de almacenamiento
+      hasStoragePermission = await Permission.storage.request().isGranted ||
+          await Permission.manageExternalStorage.request().isGranted;
+
+      // Solicitar permisos de ubicación
+      hasLocationPermission = await Permission.location.request().isGranted;
+    } else if (Platform.isIOS) {
+      // En iOS, solo se necesita ubicación
+      hasLocationPermission = await Permission.location.request().isGranted;
+    }
+
+    return hasStoragePermission && hasLocationPermission;
   }
 
   String _parseErrorMessage(String error, [StackTrace? stackTrace]) {
@@ -84,12 +96,11 @@ class _LoginScreenState extends State<LoginScreen> {
       return 'Error del servidor. Inténtalo de nuevo más tarde.';
     } else if (error.contains('timeout')) {
       return 'El servidor no responde. Verifica tu conexión a Internet.';
-    } else if (error.contains('Permisos de almacenamiento denegados')) {
-      return 'Por favor, concede permisos de almacenamiento para continuar.';
+    } else if (error.contains('Permisos necesarios no concedidos')) {
+      return 'Por favor, concede los permisos necesarios para continuar.';
     } else if (error.contains('La respuesta no contiene los datos necesarios')) {
       return 'El servidor no devolvió los datos esperados. Inténtalo más tarde.';
     } else {
-      // Si ocurre un error inesperado, devuelve el mensaje completo y la traza
       String detailedError = 'Error inesperado: $error';
       if (stackTrace != null) {
         detailedError += '\nStackTrace:\n$stackTrace';
@@ -97,7 +108,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return detailedError;
     }
   }
-
 
   String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {

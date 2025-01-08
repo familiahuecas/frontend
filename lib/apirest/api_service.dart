@@ -36,10 +36,10 @@ import 'api_client.dart';
 
 
 class ApiService {
-  final String baseUrl = kIsWeb
+  /*final String baseUrl = kIsWeb
       ? '${const String.fromEnvironment('API_URL_WEB')}/backend'  // URL para la web
-      : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el teléfono
-
+      : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el emulador del teléfono*/
+final String baseUrl = 'http://10.0.2.179:8080/backend'; //para el telefono fisico
 
   late Dio _dio;
 
