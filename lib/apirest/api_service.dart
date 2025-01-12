@@ -16,6 +16,7 @@ import '../model/numeracion.dart';
 import '../model/recaudaciones.dart';
 import '../model/recaudacionrequest.dart';
 import '../model/recaudacionresponse.dart';
+import '../model/ubicacion.dart';
 import '../model/user.dart';
 import '../model/usuarioconadelanto.dart';
 import '../model/usuarioconapuntes.dart';
@@ -36,10 +37,11 @@ import 'api_client.dart';
 
 
 class ApiService {
-  /*final String baseUrl = kIsWeb
+  final String baseUrl = kIsWeb
       ? '${const String.fromEnvironment('API_URL_WEB')}/backend'  // URL para la web
-      : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el emulador del teléfono*/
-final String baseUrl = 'http://10.0.2.179:8080/backend'; //para el telefono fisico
+      : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el emulador del teléfono
+//final String baseUrl = 'http://10.0.2.179:8080/backend'; //para el telefono fisico
+//  final String baseUrl = 'http://192.168.1.151:8080/backend'; //para el telefono sonia
 
   late Dio _dio;
 
@@ -818,5 +820,109 @@ final String baseUrl = 'http://10.0.2.179:8080/backend'; //para el telefono fisi
       throw Exception('Error al eliminar el documento: $e');
     }
   }
+  Future<void> crearUbicacion(Ubicacion ubicacion) async {
+    print('Preparando para guardar ubicacion: ${ubicacion.toJson()}');
+    final url = Uri.parse('$baseUrl/ubicacion/create');
+    final token = await _getToken(); // Obtener el token almacenado
 
+    print('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(ubicacion.toJson()), // Convertir el objeto ubicacion a JSON
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) { // Suponiendo que el backend responde con 200 para creación exitosa
+        print('ubicacion guardado exitosamente');
+      } else {
+        throw Exception('Error al guardar  ubicacion: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al guardar ubicacion: $e');
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  Future<Ubicacion> getUbicacionByNombre(String nombre) async {
+    final url = Uri.parse('$baseUrl/ubicacion/byname/$nombre');
+    final token = await _getToken();
+    print('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Convierte la respuesta JSON al modelo Ubicacion
+        return Ubicacion.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Error al obtener la ubicación: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+  Future<List<Ubicacion>> getUbicacionesPaginated(int page, int size) async {
+    final url = Uri.parse('$baseUrl/ubicacion/list?page=$page&size=$size');
+    final token = await _getToken();
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = jsonDecode(response.body);
+        final List<dynamic> content = jsonData['content'];
+
+        return content.map((data) => Ubicacion.fromJson(data)).toList();
+      } else {
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error al obtener conceptos de gasto: $e');
+    }
+  }
+  // Método para eliminar numeraciones con autenticación
+  Future<void> deleteUbicacion(int id) async {
+    final url = Uri.parse('$baseUrl/ubicacion/delete/$id');
+    final token = await _getToken(); // Obtener el token almacenado
+
+    print('Haciendo llamada DELETE a: $url');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.statusCode}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Error al eliminar la ubicacion: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
 }
