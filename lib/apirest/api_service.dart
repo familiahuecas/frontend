@@ -41,7 +41,7 @@ class ApiService {
       ? '${const String.fromEnvironment('API_URL_WEB')}/backend'  // URL para la web
       : '${const String.fromEnvironment('API_URL')}/backend'; // URL para el emulador del teléfono
 //final String baseUrl = 'http://10.0.2.179:8080/backend'; //para el telefono fisico
-//  final String baseUrl = 'http://192.168.1.151:8080/backend'; //para el telefono sonia
+//final String baseUrl = 'http://192.168.1.151:8080/backend'; //para el telefono sonia
 
   late Dio _dio;
 

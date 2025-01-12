@@ -14,6 +14,7 @@ class User implements BaseModel {
   bool enabled;
   List<String>? roles;
   String? message;
+  String? secuencia;
 
   @JsonKey(ignore: true)
   String? _fullName;
@@ -28,6 +29,7 @@ class User implements BaseModel {
     required this.enabled,
     required this.roles,
     required this.message,
+    required this.secuencia
   });
 
   UserEditable editableWith({

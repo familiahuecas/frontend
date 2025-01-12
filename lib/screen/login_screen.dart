@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart'; // Importar la librería de permisos
 import '../apirest/api_service.dart';
 import '../model/user.dart';
 import 'home_screen.dart';
-import 'dart:io';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -18,75 +16,84 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  List<int> _buttonSequence = []; // Para registrar la secuencia de pulsaciones
+
   Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-      try {
-        // Verificar permisos requeridos
-        final hasPermissions = await _requestPermissions();
-        if (!hasPermissions) {
-          throw Exception('Permisos necesarios no concedidos.');
+    try {
+      Map<String, dynamic> requestBody;
+
+      // Verificar si el login es por secuencia
+      if (_buttonSequence.length == 4) {
+        final sequenceString = _buttonSequence.join('');
+        print('Iniciando sesión con secuencia: $sequenceString');
+
+        requestBody = {
+          'secuencia': sequenceString,
+        };
+
+        _buttonSequence.clear(); // Reiniciar la secuencia después de usarla
+      } else {
+        // Validar formulario para usuario/contraseña
+        if (!_formKey.currentState!.validate()) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
         }
 
-        // Realizar la petición
-        final response = await apiService.post(
-          '/auth/login',
-          {
-            'name': _nameController.text,
-            'password': _passwordController.text,
-          },
-          requiresAuth: false,
-        );
+        print('Iniciando sesión con usuario y contraseña');
 
-        // Validar que la respuesta tiene el token y el usuario
-        if (!response.containsKey('token') || !response.containsKey('user')) {
-          throw Exception('La respuesta no contiene los datos necesarios.');
-        }
-
-        final token = response['token'];
-        final userJson = response['user'];
-        final user = User.fromJson(userJson);
-
-        await apiService.saveToken(token);
-        await apiService.saveUser(user);
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
-        );
-      } catch (e, stackTrace) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = _parseErrorMessage(e.toString(), stackTrace);
-        });
-        print('Error al iniciar sesión: $e');
-        print('StackTrace: $stackTrace');
+        requestBody = {
+          'name': _nameController.text,
+          'password': _passwordController.text,
+        };
       }
+
+      // Siempre llamar al mismo endpoint
+      const endpoint = '/auth/login';
+
+      // Realizar la llamada al servicio
+      final response = await apiService.post(endpoint, requestBody, requiresAuth: false);
+
+      if (!response.containsKey('token') || !response.containsKey('user')) {
+        throw Exception('La respuesta no contiene los datos necesarios.');
+      }
+
+      final token = response['token'];
+      final userJson = response['user'];
+      final user = User.fromJson(userJson);
+
+      await apiService.saveToken(token);
+      await apiService.saveUser(user);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
+      );
+    } catch (e, stackTrace) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = _parseErrorMessage(e.toString(), stackTrace);
+      });
+      print('Error al iniciar sesión: $e');
+      print('StackTrace: $stackTrace');
     }
   }
 
-  Future<bool> _requestPermissions() async {
-    // Manejo de permisos para almacenamiento y ubicación
-    bool hasStoragePermission = true;
-    bool hasLocationPermission = true;
-
-    if (Platform.isAndroid) {
-      // Solicitar permisos de almacenamiento
-      hasStoragePermission = await Permission.storage.request().isGranted ||
-          await Permission.manageExternalStorage.request().isGranted;
-
-      // Solicitar permisos de ubicación
-      hasLocationPermission = await Permission.location.request().isGranted;
-    } else if (Platform.isIOS) {
-      // En iOS, solo se necesita ubicación
-      hasLocationPermission = await Permission.location.request().isGranted;
-    }
-
-    return hasStoragePermission && hasLocationPermission;
+  void _handleButtonPress(int buttonId) {
+    setState(() {
+      _buttonSequence.add(buttonId); // Añadir el botón pulsado a la secuencia
+      print('Secuencia actual: $_buttonSequence');
+      if (_buttonSequence.length == 4) {
+        print('Secuencia completa: $_buttonSequence');
+        _login(); // Llamar al login cuando la secuencia esté completa
+      }
+    });
   }
 
   String _parseErrorMessage(String error, [StackTrace? stackTrace]) {
@@ -96,8 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return 'Error del servidor. Inténtalo de nuevo más tarde.';
     } else if (error.contains('timeout')) {
       return 'El servidor no responde. Verifica tu conexión a Internet.';
-    } else if (error.contains('Permisos necesarios no concedidos')) {
-      return 'Por favor, concede los permisos necesarios para continuar.';
     } else if (error.contains('La respuesta no contiene los datos necesarios')) {
       return 'El servidor no devolvió los datos esperados. Inténtalo más tarde.';
     } else {
@@ -136,41 +141,88 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 600), // Tamaño reducido de ancho
+            constraints: BoxConstraints(maxWidth: 600),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blueGrey, width: 1.5),
-                ),
-                padding: const EdgeInsets.all(16.0),
-                child: isMobile
-                    ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildImage(),
-                    SizedBox(height: 30), // Mantiene el alto original
-                    _buildForm(),
-                  ],
-                )
-                    : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: _buildImage(),
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blueGrey, width: 1.5),
                     ),
-                    SizedBox(width: 30),
-                    Expanded(
-                      flex: 1,
-                      child: _buildForm(),
+                    padding: const EdgeInsets.all(16.0),
+                    child: isMobile
+                        ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildImage(),
+                        SizedBox(height: 30),
+                        _buildForm(),
+                      ],
+                    )
+                        : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(flex: 1, child: _buildImage()),
+                        SizedBox(width: 30),
+                        Expanded(flex: 1, child: _buildForm()),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  // Botones invisibles en las esquinas
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: GestureDetector(
+                      onTap: () => _handleButtonPress(1),
+                      child: Container(
+                        color: Colors.transparent,
+                        height: 50,
+                        width: 50,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => _handleButtonPress(2),
+                      child: Container(
+                        color: Colors.transparent,
+                        height: 50,
+                        width: 50,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 8,
+                    left: 8,
+                    child: GestureDetector(
+                      onTap: () => _handleButtonPress(3),
+                      child: Container(
+                        color: Colors.transparent,
+                        height: 50,
+                        width: 50,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => _handleButtonPress(4),
+                      child: Container(
+                        color: Colors.transparent,
+                        height: 50,
+                        width: 50,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -184,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onTap: _login,
       child: Image.asset(
         'assets/images/olivoFHsinfondo.png',
-        height: 200, // Mantiene el alto original
+        height: 200,
         fit: BoxFit.contain,
       ),
     );
@@ -197,61 +249,57 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Center(
-            child: TextFormField(
-              controller: _nameController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                label: Center(
-                  child: Text(
-                    'Nombre de usuario',
-                    style: TextStyle(
-                      color: Color(0xff742d2d),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+          TextFormField(
+            controller: _nameController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              label: Center(
+                child: Text(
+                  'Nombre de usuario',
+                  style: TextStyle(
+                    color: Color(0xff742d2d),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                filled: true,
-                fillColor: Colors.white24,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
               ),
-              style: TextStyle(color: Color(0xff742d2d)),
-              validator: _validateUsername,
+              filled: true,
+              fillColor: Colors.white24,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide.none,
+              ),
             ),
+            style: TextStyle(color: Color(0xff742d2d)),
+            validator: _validateUsername,
           ),
           SizedBox(height: 15),
-          Center(
-            child: TextFormField(
-              controller: _passwordController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                label: Center(
-                  child: Text(
-                    'Contraseña',
-                    style: TextStyle(
-                      color: Color(0xff742d2d),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+          TextFormField(
+            controller: _passwordController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              label: Center(
+                child: Text(
+                  'Contraseña',
+                  style: TextStyle(
+                    color: Color(0xff742d2d),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                filled: true,
-                fillColor: Colors.white24,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
               ),
-              obscureText: true,
-              style: TextStyle(color: Color(0xff742d2d)),
-              validator: _validatePassword,
+              filled: true,
+              fillColor: Colors.white24,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide.none,
+              ),
             ),
+            obscureText: true,
+            style: TextStyle(color: Color(0xff742d2d)),
+            validator: _validatePassword,
           ),
-          SizedBox(height: 20), // Mantiene el alto original
+          SizedBox(height: 20),
           if (_isLoading)
             Center(child: CircularProgressIndicator(color: Colors.purpleAccent)),
           if (_errorMessage != null)

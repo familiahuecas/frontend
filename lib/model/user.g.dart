@@ -15,6 +15,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       roles:
           (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
       message: json['message'] as String?,
+      secuencia: json['secuencia'] as String?,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -25,6 +26,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'enabled': instance.enabled,
       'roles': instance.roles,
       'message': instance.message,
+      'secuencia': instance.secuencia,
     };
 
 UserEditable _$UserEditableFromJson(Map<String, dynamic> json) => UserEditable(
