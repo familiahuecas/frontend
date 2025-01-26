@@ -2,9 +2,7 @@ import 'package:familiahuecasfrontend/screen/ubicacion.dart';
 import 'package:familiahuecasfrontend/screen/user.dart';
 import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
 import 'package:flutter/material.dart';
-import '../apirest/api_service.dart';
-import '../model/user.dart';
-import 'documentos.dart';
+
 import 'documentos.dart';
 import 'gestion.dart';
 import 'maquinas.dart';
@@ -19,31 +17,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  User? currentUser;
-  bool _isLoading = true;
-  final ApiService apiService = ApiService();
-
-  @override
-  void initState() {
-    super.initState();
-    fetchCurrentUser();
-  }
-
-  Future<void> fetchCurrentUser() async {
-    try {
-      final user = await apiService.getUser();
-      setState(() {
-        currentUser = user;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print('Error: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,16 +28,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           width: MediaQuery.of(context).size.width * 0.85,
           padding: const EdgeInsets.symmetric(vertical: 24.0),
-          child: _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : currentUser == null
-              ? Center(child: Text('Error al cargar la información del usuario'))
-              : Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Saludo al usuario
               Text(
-                'Bienvenido, ${currentUser!.name}',
+                'Bienvenido',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -77,185 +46,116 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Botón "Usuarios"
-                      TextButton(
-                        onPressed: () {
+                      _buildMenuButton(
+                        title: 'Usuarios',
+                        icon: Icons.person,
+                        backgroundColor: Colors.blue,
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => UsuariosScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => UsuariosScreen()),
                           );
                         },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 80),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
-                          ),
-                          elevation: 5,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.person, color: Colors.blue[900], size: 32), // Azul marino
-                            SizedBox(height: 8),
-                            Text(
-                              'Usuarios',
-                              style: TextStyle(
-                                color: Colors.blue[900], // Azul marino
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       SizedBox(height: 16),
-                      // Botón "Gestión"
-                      TextButton(
-                        onPressed: () {
+                      _buildMenuButton(
+                        title: 'Gestión',
+                        icon: Icons.settings,
+                        backgroundColor: Colors.green,
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => GestionScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => GestionScreen()),
                           );
                         },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 80),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
-                          ),
-                          elevation: 5,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.settings, color: Colors.blue[900], size: 32), // Azul marino
-                            SizedBox(height: 8),
-                            Text(
-                              'Gestión',
-                              style: TextStyle(
-                                color: Colors.blue[900], // Azul marino
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       SizedBox(height: 16),
-                      // Botón "Máquinas"
-                      TextButton(
-                        onPressed: () {
+                      _buildMenuButton(
+                        title: 'Máquinas',
+                        icon: Icons.computer,
+                        backgroundColor: Colors.orange,
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => MaquinasScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => MaquinasScreen()),
                           );
                         },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 80),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
-                          ),
-                          elevation: 5,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.computer, color: Colors.blue[900], size: 32), // Azul marino
-                            SizedBox(height: 8),
-                            Text(
-                              'Máquinas',
-                              style: TextStyle(
-                                color: Colors.blue[900], // Azul marino
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       SizedBox(height: 16),
-                      // Botón "Documentos"
-                      TextButton(
-                        onPressed: () {
+                      _buildMenuButton(
+                        title: 'Documentos',
+                        icon: Icons.folder,
+                        backgroundColor: Colors.purple,
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => DocumentosScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => DocumentosScreen()),
                           );
                         },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 80),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
-                          ),
-                          elevation: 5,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.folder, color: Colors.blue[900], size: 32), // Azul marino
-                            SizedBox(height: 8),
-                            Text(
-                              'Documentos',
-                              style: TextStyle(
-                                color: Colors.blue[900], // Azul marino
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       SizedBox(height: 16),
-                      // Botón "Documentos"
-                      TextButton(
-                        onPressed: () {
+                      _buildMenuButton(
+                        title: 'Ubicaciones',
+                        icon: Icons.map,
+                        backgroundColor: Colors.red,
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => UbicacionScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => UbicacionScreen()),
                           );
                         },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 80),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.blue[900]!, width: 1.5), // Azul marino
-                          ),
-                          elevation: 5,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.map, color: Colors.blue[900], size: 32), // Azul marino
-                            SizedBox(height: 8),
-                            Text(
-                              'Ubicaciones',
-                              style: TextStyle(
-                                color: Colors.blue[900], // Azul marino
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),
-
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
 
+  Widget _buildMenuButton({
+    required String title,
+    required IconData icon,
+    required Color backgroundColor,
+    required VoidCallback onTap,
+  }) {
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        backgroundColor: backgroundColor,
+        minimumSize: Size(double.infinity, 80),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 5,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 32,
+          ),
+          SizedBox(width: 16),
+          Text(
+            title,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
