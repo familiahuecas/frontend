@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../apirest/api_service.dart';
 import '../model/ubicacion.dart';
-import 'search_ubicacion_screen.dart'; // Asegúrate de que esta pantalla exista
+import 'search_ubicacion_screen.dart';
+import 'package:share_plus/share_plus.dart';
 
 class VerUbicacionesScreen extends StatefulWidget {
   @override
@@ -102,12 +103,10 @@ class _VerUbicacionesScreenState extends State<VerUbicacionesScreen> {
 
   Widget _buildUbicacionCard(Ubicacion ubicacion) {
     return GestureDetector(
-      onTap: () => _navigateToUbicacionDetails(ubicacion), // Navegación al pulsar
+      onTap: () => _navigateToUbicacionDetails(ubicacion),
       child: Center(
         child: Container(
-          constraints: BoxConstraints(
-            maxWidth: 600,
-          ),
+          constraints: BoxConstraints(maxWidth: 600),
           child: Card(
             color: Colors.white,
             elevation: 6,
@@ -124,8 +123,7 @@ class _VerUbicacionesScreenState extends State<VerUbicacionesScreen> {
                       children: [
                         if (ubicacion.foto != null && ubicacion.foto!.isNotEmpty)
                           ClipRRect(
-                            borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(12)),
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                             child: Image.memory(
                               base64Decode(ubicacion.foto!),
                               fit: BoxFit.cover,
@@ -167,9 +165,17 @@ class _VerUbicacionesScreenState extends State<VerUbicacionesScreen> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _showDeleteConfirmationDialog(ubicacion.id),
+                  Column(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.share, color: Colors.blue),
+                        onPressed: () => _compartirUbicacion(ubicacion),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _showDeleteConfirmationDialog(ubicacion.id),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -178,6 +184,14 @@ class _VerUbicacionesScreenState extends State<VerUbicacionesScreen> {
         ),
       ),
     );
+  }
+
+  void _compartirUbicacion(Ubicacion ubicacion) {
+    String mensaje = '📍 *Ubicación*: ${ubicacion.nombre ?? 'Desconocida'}\n'
+        '📌 *Dirección*: ${ubicacion.ubicacion ?? 'No disponible'}\n\n'
+        '🌍 Ver en Google Maps: https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(ubicacion.ubicacion ?? '')}';
+
+    Share.share(mensaje);
   }
 
   @override
