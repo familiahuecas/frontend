@@ -30,7 +30,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 import 'api_client.dart';
-
+import '../utils/logger.dart';
 
 //import 'download_file_service.dart';
 //import 'dart:html' as html; // Para la web
@@ -79,7 +79,8 @@ class ApiService {
   Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body, {bool requiresAuth = true}) async {
     final url = Uri.parse('$baseUrl$endpoint');
     final token = requiresAuth ? await _getToken() : null;
-    print('Haciendo llamada a: $url');
+  //  log('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url', type: LogType.api);
 
     try {
       final response = await http.post(
@@ -91,7 +92,7 @@ class ApiService {
         body: jsonEncode(body),
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       // Si la respuesta es exitosa, decodifica y retorna
       if (response.statusCode == 200) {
@@ -108,10 +109,10 @@ class ApiService {
 
   // Método GET para obtener usuarios
   Future<List<User>> getUsers() async {
-    print('Haciendo llamada a: getUsers');
+    log('Haciendo llamada a: getUsers');
     final url = Uri.parse('$baseUrl/users/list');
     final token = await _getToken();
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.get(
@@ -122,7 +123,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = jsonDecode(response.body);
@@ -139,7 +140,7 @@ class ApiService {
   Future<NumeracionPage> getNumeraciones(int page, int size) async {
     final url = Uri.parse('$baseUrl/numeracion/list?page=$page&size=$size');
     final token = await _getToken();
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.get(
@@ -150,7 +151,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) {
         // Mapea la respuesta JSON al modelo NumeracionPage
@@ -167,7 +168,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/numeracion/deleteNumeracion/$id');
     final token = await _getToken(); // Obtener el token almacenado
 
-    print('Haciendo llamada DELETE a: $url');
+    log('Haciendo llamada DELETE a: $url');
 
     try {
       final response = await http.delete(
@@ -178,7 +179,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.statusCode}');
+      log('Respuesta recibida: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         throw Exception('Error al eliminar la numeración: ${response.statusCode}');
@@ -193,12 +194,12 @@ class ApiService {
     final token = await _getToken();
 
     // Log para ver qué se le envía al servicio
-    print('Enviando solicitud a: $url');
-    print('Headers: ${{
+    log('Enviando solicitud a: $url');
+    log('Headers: ${{
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     }}');
-    print('Body: ${request.toJson()}');
+    log('Body: ${request.toJson()}');
 
     try {
       final response = await http.post(
@@ -210,7 +211,7 @@ class ApiService {
         body: jsonEncode(request.toJson()), // Convertir el objeto request a JSON
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) {
         return Recaudacionresponse.fromJson(jsonDecode(response.body)); // Mapear la respuesta a RecaudacionResponse
@@ -236,7 +237,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        print('Recaudación guardada con éxito');
+        log('Recaudación guardada con éxito');
       } else {
         throw Exception('Error al guardar la recaudación: ${response.statusCode}');
       }
@@ -247,7 +248,7 @@ class ApiService {
   Future<RecaudacionesPage> getRecaudaciones(int page, int size) async {
     final url = Uri.parse('$baseUrl/numeracion/listrecaudacion?page=$page&size=$size');
     final token = await _getToken();
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.get(
@@ -258,7 +259,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) {
         // Mapea la respuesta JSON al modelo RecaudacionesPage
@@ -274,7 +275,7 @@ class ApiService {
   Future<UserPage> getUsersPaginated(int page, int size) async {
     final url = Uri.parse('$baseUrl/users/listpaginated?page=$page&size=$size');
     final token = await _getToken();
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.get(
@@ -285,7 +286,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) {
         // Mapea la respuesta JSON al modelo UserPage
@@ -301,7 +302,7 @@ class ApiService {
   Future<void> deleteUser(int id) async {
     final url = Uri.parse('$baseUrl/users/delete/$id');
     final token = await _getToken();
-    print('Haciendo llamada DELETE a: $url');
+    log('Haciendo llamada DELETE a: $url');
 
     try {
       final response = await http.delete(
@@ -312,7 +313,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.statusCode}');
+      log('Respuesta recibida: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         throw Exception('Error al eliminar el usuario: ${response.statusCode}');
@@ -322,11 +323,11 @@ class ApiService {
     }
   }
   Future<void> createUser(User user) async {
-    print('Preparando para guardar usuario: ${user.toJson()}');
+    log('Preparando para guardar usuario: ${user.toJson()}');
     final url = Uri.parse('$baseUrl/users/create');
     final token = await _getToken(); // Obtener el token almacenado
 
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.post(
@@ -338,15 +339,15 @@ class ApiService {
         body: jsonEncode(user.toJson()), // Convertir el objeto User a JSON
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) { // Suponiendo que el backend responde con 200 para creación exitosa
-        print('Usuario guardado exitosamente');
+        log('Usuario guardado exitosamente');
       } else {
         throw Exception('Error al guardar el usuario: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al guardar el usuario: $e');
+      log('Error al guardar el usuario: $e');
       throw Exception('Error de red o del servidor: $e');
     }
   }
@@ -362,7 +363,30 @@ class ApiService {
           if (token != null) 'Authorization': 'Bearer $token',
         },
       );
+      log('Haciendo llamada a: $url');
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((data) => UsuarioConApuntes.fromJson(data)).toList();
+      } else {
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error al obtener usuarios con apuntes: $e');
+    }
+  }
+  Future<List<UsuarioConApuntes>> getUsuariosConAdelantos() async {
+    final url = Uri.parse('$baseUrl/adelanto/usuariosconadelantos');
+    final token = await _getToken();
 
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+      log('Haciendo llamada a: $url');
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
         return jsonList.map((data) => UsuarioConApuntes.fromJson(data)).toList();
@@ -385,13 +409,14 @@ class ApiService {
           if (token != null) 'Authorization': 'Bearer $token',
         },
       );
-
+      log('Haciendo llamada a: $url');
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = jsonDecode(response.body);
         final List<dynamic> content = jsonData['content'];
 
         return content.map((data) => ConceptoGastoAdelanto.fromJson(data)).toList();
       } else {
+        log('Respuesta recibida: ${response.statusCode}');
         throw Exception('Error: ${response.statusCode}');
       }
     } catch (e) {
@@ -402,7 +427,7 @@ class ApiService {
     final url = Uri.parse(
         '$baseUrl/conceptos/list?usuario=$usuario&page=$page&size=$size');
     final token = await _getToken();
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.get(
@@ -412,7 +437,7 @@ class ApiService {
           if (token != null) 'Authorization': 'Bearer $token',
         },
       );
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = jsonDecode(response.body);
@@ -428,11 +453,11 @@ class ApiService {
     }
   }
   Future<void> crearApunte(ConceptoGastoAdelanto apunte) async {
-    print('Preparando para guardar apunte: ${apunte.toJson()}');
+    log('Preparando para guardar apunte: ${apunte.toJson()}');
     final url = Uri.parse('$baseUrl/conceptos/create');
     final token = await _getToken(); // Obtener el token almacenado
 
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.post(
@@ -444,15 +469,15 @@ class ApiService {
         body: jsonEncode(apunte.toJson()), // Convertir el objeto Apunte a JSON
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) { // Suponiendo que el backend responde con 200 para creación exitosa
-        print('Apunte guardado exitosamente');
+        log('Apunte guardado exitosamente');
       } else {
         throw Exception('Error al guardar el apunte: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al guardar el apunte: $e');
+      log('Error al guardar el apunte: $e');
       throw Exception('Error de red o del servidor: $e');
     }
   }
@@ -460,7 +485,7 @@ class ApiService {
   Future<void> deleteApunte(int id) async {
     final url = Uri.parse('$baseUrl/conceptos/delete/$id');
     final token = await _getToken();
-    print('Haciendo llamada DELETE a: $url');
+    log('Haciendo llamada DELETE a: $url');
 
     try {
       final response = await http.delete(
@@ -471,7 +496,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.statusCode}');
+      log('Respuesta recibida: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         throw Exception('Error al eliminar el usuario: ${response.statusCode}');
@@ -480,12 +505,10 @@ class ApiService {
       throw Exception('Error de red o del servidor: $e');
     }
   }
-  Future<void> crearAdelanto(UsuarioConAdelanto adelanto) async {
-    print('Preparando para guardar adelanto: ${adelanto.toJson()}');
-    final url = Uri.parse('$baseUrl/adelanto/create');
-    final token = await _getToken(); // Obtener el token almacenado
-
-    print('Haciendo llamada a: $url');
+  Future<void> crearAdelanto(Map<String, dynamic> adelantoJson) async {
+    print('📡 [API] Preparando para guardar adelanto: $adelantoJson');
+    final url = Uri.parse('$baseUrl/detalleadelanto');
+    final token = await _getToken();
 
     try {
       final response = await http.post(
@@ -494,25 +517,24 @@ class ApiService {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(adelanto.toJson()), // Convertir el objeto Adelanto a JSON
+        body: jsonEncode(adelantoJson),
       );
 
-      print('Respuesta recibida: ${response.body}');
+      print('✅ [RESPUESTA] ${response.body}');
 
-      if (response.statusCode == 200) {
-        print('Adelanto guardado exitosamente');
-      } else {
+      if (response.statusCode != 200) {
         throw Exception('Error al guardar el adelanto: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al guardar el adelanto: $e');
+      log('Error al guardar el adelanto: $e', type: LogType.error);
       throw Exception('Error de red o del servidor: $e');
     }
   }
+
   Future<void> deleteAdelanto(int id) async {
     final url = Uri.parse('$baseUrl/adelanto/delete/$id');
     final token = await _getToken();
-    print('Haciendo llamada DELETE a: $url');
+    log('Haciendo llamada DELETE a: $url');
 
     try {
       final response = await http.delete(
@@ -523,7 +545,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.statusCode}');
+      log('Respuesta recibida: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         throw Exception('Error al eliminar el adelanto: ${response.statusCode}');
@@ -561,10 +583,10 @@ class ApiService {
       final url = Uri.parse('$baseUrl/documentos/upload?parentId=$parentId');
       final token = await _getToken();
 
-      print('URL de subida: $url');
-      print('Iniciando subida del archivo: $fileName');
-      print('Tamaño del archivo: ${bytes.length} bytes');
-      print('Parent ID: $parentId');
+      log('URL de subida: $url');
+      log('Iniciando subida del archivo: $fileName');
+      log('Tamaño del archivo: ${bytes.length} bytes');
+      log('Parent ID: $parentId');
 
       final request = http.MultipartRequest('POST', url)
         ..headers['Authorization'] = 'Bearer $token'
@@ -578,15 +600,15 @@ class ApiService {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      print('Código de respuesta: ${response.statusCode}');
+      log('Código de respuesta: ${response.statusCode}');
       if (response.statusCode != 200) {
-        print('Error al subir el archivo: ${response.body}');
+        log('Error al subir el archivo: ${response.body}');
         throw Exception('Error al subir el archivo: ${response.body}');
       }
 
-      print('Archivo subido exitosamente');
+      log('Archivo subido exitosamente');
     } catch (e) {
-      print('Error en la subida del archivo: $e');
+      log('Error en la subida del archivo: $e');
       throw Exception('Error al subir el archivo (Web): $e');
     }
   }
@@ -619,7 +641,7 @@ class ApiService {
     final token = await _getToken();
 
     try {
-      print('Iniciando descarga desde: $url');
+      log('Iniciando descarga desde: $url');
 
       // Descargar el archivo
       await FileDownloader.downloadFile(
@@ -629,17 +651,17 @@ class ApiService {
         downloadDestination: DownloadDestinations.publicDownloads, // Carpeta pública Download
         notificationType: NotificationType.all, // Mostrar progreso y éxito
         onProgress: (fileName, progress) {
-          print('Progreso de descarga: $progress%');
+          log('Progreso de descarga: $progress%');
         },
         onDownloadCompleted: (path) {
-          print('Archivo descargado exitosamente en: $path');
+          log('Archivo descargado exitosamente en: $path');
         },
         onDownloadError: (error) {
-          print('Error en la descarga: $error');
+          log('Error en la descarga: $error');
         },
       );
     } catch (e) {
-      print('Excepción capturada: $e');
+      log('Excepción capturada: $e');
       throw Exception('Error al descargar el archivo: $e');
     }
   }
@@ -656,9 +678,9 @@ class ApiService {
       );
 
       await intent.launch();
-      print('Sistema notificado sobre el archivo: $filePath');
+      log('Sistema notificado sobre el archivo: $filePath');
     } catch (e) {
-      print('Error notificando al sistema: $e');
+      log('Error notificando al sistema: $e');
     }
   }
 
@@ -668,7 +690,7 @@ class ApiService {
     final token = await _getToken();
 
     try {
-      print('Iniciando descarga desde: $url');
+      log('Iniciando descarga desde: $url');
 
       // Crea un objeto de solicitud para la descarga
       final request = html.HttpRequest();
@@ -679,7 +701,7 @@ class ApiService {
 
       request.onLoad.listen((event) {
         if (request.status == 200) {
-          print('Código de respuesta: ${request.status}');
+          log('Código de respuesta: ${request.status}');
 
           // Crea un enlace temporal para iniciar la descarga
           final blob = request.response; // Contenido del archivo
@@ -696,21 +718,21 @@ class ApiService {
           // Libera la URL creada
           html.Url.revokeObjectUrl(url);
 
-          print('Archivo descargado exitosamente: $fileName');
+          log('Archivo descargado exitosamente: $fileName');
         } else {
-          print('Error en la descarga: Código: ${request.status}');
+          log('Error en la descarga: Código: ${request.status}');
           throw Exception('Error al descargar el archivo: ${request.status}');
         }
       });
 
       request.onError.listen((event) {
-        print('Error en la solicitud HTTP: ${request.status}');
+        log('Error en la solicitud HTTP: ${request.status}');
         throw Exception('Error al descargar el archivo: ${request.status}');
       });
 
       request.send();
     } catch (e) {
-      print('Excepción capturada durante la descarga: $e');
+      log('Excepción capturada durante la descarga: $e');
       throw Exception('Error al descargar el archivo: $e');
     }
   }*/
@@ -721,10 +743,10 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> getDocumentTreeNode() async {
     final url = Uri.parse('$baseUrl/documentos/tree');
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
     try {
       final response = await http.get(url);
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(json.decode(response.body));
       } else {
@@ -745,8 +767,8 @@ class ApiService {
     };
 
     try {
-      print('Enviando solicitud a: $url');
-      print('Datos enviados: $folderData');
+      log('Enviando solicitud a: $url');
+      log('Datos enviados: $folderData');
 
       final response = await _dio.post(
         url,
@@ -762,7 +784,7 @@ class ApiService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Asegúrate de que el backend devuelve un objeto con el `id`
         final newFolderId = response.data['id']; // Ajusta según la estructura real del JSON de respuesta
-        print('Carpeta creada con éxito: ID $newFolderId');
+        log('Carpeta creada con éxito: ID $newFolderId');
         return newFolderId;
       } else {
         throw Exception(
@@ -770,7 +792,7 @@ class ApiService {
         );
       }
     } catch (e) {
-      print('Error al enviar la solicitud: $e');
+      log('Error al enviar la solicitud: $e');
       rethrow;
     }
   }
@@ -778,7 +800,7 @@ class ApiService {
   Future<void> deleteFolder(int parentId, int childId) async {
     final url = '$baseUrl/documentos/$parentId/remove-child/$childId';
     final token = await _getToken();
-    print('Enviando solicitud a: $url');
+    log('Enviando solicitud a: $url');
     try {
       final response = await _dio.delete(
         url,
@@ -794,14 +816,14 @@ class ApiService {
         throw Exception('Error al eliminar la carpeta: ${response.statusCode} - ${response.data}');
       }
     } catch (e) {
-      print('Error al eliminar la carpeta: $e');
+      log('Error al eliminar la carpeta: $e');
       rethrow;
     }
   }
   Future<void> deleteDocument(int id) async {
     final url = '$baseUrl/documentos/delete/$id';
     final token = await _getToken();
-    print('Enviando solicitud a: $url');
+    log('Enviando solicitud a: $url');
     try {
       final response = await _dio.delete(
         url,
@@ -812,7 +834,7 @@ class ApiService {
           },
         ),
       );
-      print('Respuesta recibida: ${response}');
+      log('Respuesta recibida: ${response}');
       if (response.statusCode != 200) {
         throw Exception('Error al eliminar el documento: ${response.data}');
       }
@@ -821,11 +843,11 @@ class ApiService {
     }
   }
   Future<void> crearUbicacion(Ubicacion ubicacion) async {
-    print('Preparando para guardar ubicacion: ${ubicacion.toJson()}');
+    log('Preparando para guardar ubicacion: ${ubicacion.toJson()}');
     final url = Uri.parse('$baseUrl/ubicacion/create');
     final token = await _getToken(); // Obtener el token almacenado
 
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.post(
@@ -837,22 +859,22 @@ class ApiService {
         body: jsonEncode(ubicacion.toJson()), // Convertir el objeto ubicacion a JSON
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) { // Suponiendo que el backend responde con 200 para creación exitosa
-        print('ubicacion guardado exitosamente');
+        log('ubicacion guardado exitosamente');
       } else {
         throw Exception('Error al guardar  ubicacion: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al guardar ubicacion: $e');
+      log('Error al guardar ubicacion: $e');
       throw Exception('Error de red o del servidor: $e');
     }
   }
   Future<Ubicacion> getUbicacionByNombre(String nombre) async {
     final url = Uri.parse('$baseUrl/ubicacion/byname/$nombre');
     final token = await _getToken();
-    print('Haciendo llamada a: $url');
+    log('Haciendo llamada a: $url');
 
     try {
       final response = await http.get(
@@ -863,7 +885,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.body}');
+      log('Respuesta recibida: ${response.body}');
 
       if (response.statusCode == 200) {
         // Convierte la respuesta JSON al modelo Ubicacion
@@ -905,7 +927,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/ubicacion/delete/$id');
     final token = await _getToken(); // Obtener el token almacenado
 
-    print('Haciendo llamada DELETE a: $url');
+    log('Haciendo llamada DELETE a: $url');
 
     try {
       final response = await http.delete(
@@ -916,7 +938,7 @@ class ApiService {
         },
       );
 
-      print('Respuesta recibida: ${response.statusCode}');
+      log('Respuesta recibida: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         throw Exception('Error al eliminar la ubicacion: ${response.statusCode}');
@@ -925,4 +947,37 @@ class ApiService {
       throw Exception('Error de red o del servidor: $e');
     }
   }
+  Future<List<UsuarioConAdelanto>> getAnticiposPaginated(int page, int size) async {
+    final url = Uri.parse('$baseUrl/detalleadelanto/list?page=$page&size=$size');
+    final token = await _getToken();
+    log('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+      log('StatusCode: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = jsonDecode(response.body);
+        final List<dynamic> content = jsonData['content'];
+        final lista = content.map((e) => UsuarioConAdelanto.fromJson(e)).toList();
+        log('Anticipos cargados:\n' +
+            lista.map((e) => '➡️ ID: ${e.idUsuario}, Cantidad: ${e.cantidadSolicitada}, Fecha: ${e.fecha}').join('\n'),
+            type: LogType.api);
+
+        return content.map((e) => UsuarioConAdelanto.fromJson(e)).toList();
+      } else {
+        log('Error: ${response.statusCode}');
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Error al obtener anticipos: $e');
+      throw Exception('Error al obtener anticipos: $e');
+    }
+  }
+
 }

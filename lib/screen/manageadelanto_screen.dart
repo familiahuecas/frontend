@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../model/adelantorequest.dart';
 import '../model/usuarioconadelanto.dart';
 import '../apirest/api_service.dart';
 import 'widget/common_header.dart';
@@ -14,23 +15,32 @@ class ManageAdelantoScreen extends StatefulWidget {
 
 class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
   late TextEditingController cantidadController;
+  late TextEditingController descripcionController;
   String? usuarioSeleccionado;
-  //List<String> usuarios = [];
   bool isLoading = false;
-  List<Map<String, dynamic>> usuarios = []; // Guardará ID y nombre del usuario
+  List<Map<String, dynamic>> usuarios = [];
+
   @override
   void initState() {
     super.initState();
     cantidadController = TextEditingController(
         text: widget.adelanto?.cantidadSolicitada.toString() ?? '');
+    descripcionController = TextEditingController(
+        text: widget.adelanto?.descripcion ?? '');
     usuarioSeleccionado = widget.adelanto?.idUsuario.toString();
     _fetchUsuarios();
+  }
+
+  @override
+  void dispose() {
+    cantidadController.dispose();
+    descripcionController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchUsuarios() async {
     setState(() => isLoading = true);
     try {
-      // Obtener todos los usuarios del sistema
       final fetchedUsuarios = await ApiService().getUsers();
       setState(() {
         usuarios = fetchedUsuarios
@@ -46,10 +56,10 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
     }
   }
 
-
-
   void _onSubmitPressed() {
-    if (cantidadController.text.isEmpty || usuarioSeleccionado == null) {
+    if (cantidadController.text.isEmpty ||
+        descripcionController.text.isEmpty ||
+        usuarioSeleccionado == null) {
       _showErrorDialog('Por favor, rellena todos los campos.');
       return;
     }
@@ -59,13 +69,14 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
       return;
     }
 
-    final adelantoPayload = UsuarioConAdelanto(
-      idUsuario: int.tryParse(usuarioSeleccionado!) ?? 0, // Convertir el ID seleccionado
+    final adelanto = Adelantorequest(
+      idUsuario: int.parse(usuarioSeleccionado!),
       cantidadSolicitada: double.parse(cantidadController.text),
+      descripcion: descripcionController.text,
+      fecha: DateTime.now().toIso8601String(),
     );
-
     ApiService()
-        .crearAdelanto(adelantoPayload)
+        .crearAdelanto(adelanto.toJson())
         .then((_) {
       showDialog(
         context: context,
@@ -85,8 +96,8 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Cierra el diálogo
-                Navigator.pop(context, true); // Notifica que hubo una actualización
+                Navigator.pop(context);
+                Navigator.pop(context, true);
               },
               child: Text('Cerrar'),
             ),
@@ -119,7 +130,8 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonHeader(
-          title: widget.adelanto == null ? 'Crear Adelanto' : 'Editar Adelanto'),
+        title: widget.adelanto == null ? 'Crear Adelanto' : 'Editar Adelanto',
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -133,6 +145,11 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
               icon: Icons.attach_money,
               keyboardType: TextInputType.number,
             ),
+            _buildInputField(
+              controller: descripcionController,
+              label: 'Descripción',
+              icon: Icons.description,
+            ),
             _buildDropdownUsuarios(),
             SizedBox(height: 20),
             Center(
@@ -143,7 +160,8 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
                   minimumSize: Size(double.infinity, 80),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.blueAccent, width: 1.5),
+                    side:
+                    BorderSide(color: Colors.blueAccent, width: 1.5),
                   ),
                   elevation: 5,
                 ),
@@ -199,7 +217,7 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: DropdownButtonFormField<String>(
-        value: usuarioSeleccionado, // Aquí está el ID seleccionado
+        value: usuarioSeleccionado,
         hint: Text('Selecciona un usuario'),
         isExpanded: true,
         decoration: InputDecoration(
@@ -209,18 +227,16 @@ class _ManageAdelantoScreenState extends State<ManageAdelantoScreen> {
         ),
         items: usuarios.map((usuario) {
           return DropdownMenuItem(
-            value: usuario['id'].toString(), // Guardar el ID del usuario
-            child: Text(usuario['name']), // Mostrar el nombre del usuario
+            value: usuario['id'].toString(),
+            child: Text(usuario['name']),
           );
         }).toList(),
         onChanged: (value) {
           setState(() {
-            usuarioSeleccionado = value; // Almacenar el ID del usuario seleccionado
+            usuarioSeleccionado = value;
           });
         },
       ),
     );
   }
-
-
 }

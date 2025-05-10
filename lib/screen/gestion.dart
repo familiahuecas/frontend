@@ -1,6 +1,7 @@
 import 'package:familiahuecasfrontend/screen/manageadelanto_screen.dart';
 import 'package:familiahuecasfrontend/screen/manageapunte_screen.dart';
 import 'package:familiahuecasfrontend/screen/totaladelanto_screen.dart';
+import 'package:familiahuecasfrontend/screen/veranticipos_screen.dart';
 import 'package:familiahuecasfrontend/screen/verapuntes_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
@@ -200,6 +201,40 @@ class GestionScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => VerAnticiposScreen()),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 80),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.view_list, color: Colors.blue[900]!, size: 32),
+                      SizedBox(height: 8),
+                      Text(
+                        'Listar anticipos',
+                        style: TextStyle(
+                          color: Colors.blue[900]!,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               ],
             ),
           ),
