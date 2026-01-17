@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/app_theme.dart';
 import 'screen/home_screen.dart';
 import 'screen/login_screen.dart';
 
@@ -20,14 +22,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Familia Huecas',
+      debugShowCheckedModeBanner: false,
       initialRoute: initialRoute,
       routes: {
-        '/': (context) => HomeScreen(token: ''), // Ajusta el token según sea necesario
+        '/': (context) => HomeScreen(token: ''),
         '/login': (context) => LoginScreen(),
       },
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      // Tema claro con tipografía Inter
+      theme: AppTheme.lightTheme.copyWith(
+        textTheme: GoogleFonts.interTextTheme(
+          AppTheme.lightTheme.textTheme,
+        ),
       ),
+      // Tema oscuro (opcional - se puede activar según preferencias del sistema)
+      darkTheme: AppTheme.darkTheme.copyWith(
+        textTheme: GoogleFonts.interTextTheme(
+          AppTheme.darkTheme.textTheme,
+        ),
+      ),
+      themeMode: ThemeMode.light, // Cambiar a ThemeMode.system para seguir el sistema
     );
   }
 }
