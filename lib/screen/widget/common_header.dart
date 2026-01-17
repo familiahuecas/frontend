@@ -83,7 +83,8 @@ class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
   // Método para manejar el logout
   Future<void> _logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Eliminar todos los datos de la sesión
+    //await prefs.clear(); // Eliminar todos los datos de la sesión
+    await prefs.remove('token');
     Navigator.of(context).pushReplacementNamed('/login'); // Redirigir al login
   }
 

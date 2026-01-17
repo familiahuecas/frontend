@@ -169,7 +169,8 @@ class _ListUsuariosScreenState extends State<ListUsuariosScreen> {
                       ),
                     ),
                     Wrap(
-                      spacing: 8,
+                      spacing: 6,
+                      runSpacing: 4,
                       children: user.roles?.map((role) {
                         Color roleColor;
                         switch (role) {
@@ -190,17 +191,27 @@ class _ListUsuariosScreenState extends State<ListUsuariosScreen> {
                             role,
                             style: TextStyle(
                               color: roleColor,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 8, // 👈 fuente más pequeña
                             ),
                           ),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0), // 👈 reduce el relleno
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // 👈 reduce área táctil
+                          visualDensity: const VisualDensity(horizontal: -2, vertical: -2), // 👈 compacta aún más
                           backgroundColor: Colors.white,
                           shape: StadiumBorder(
-                            side: BorderSide(color: roleColor, width: 1.5),
+                            side: BorderSide(color: roleColor, width: 1),
                           ),
                         );
-                      }).toList() ??
-                          [Chip(label: Text('Sin roles asignados'))],
+                      }).toList() ?? [
+                        Chip(
+                          label: const Text('Sin roles asignados', style: TextStyle(fontSize: 11)),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+                        )
+                      ],
                     ),
+
                   ],
                 ),
               ),

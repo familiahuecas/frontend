@@ -1,130 +1,69 @@
-import 'package:familiahuecasfrontend/screen/recaudaciones.dart';
 import 'package:flutter/material.dart';
+import 'package:familiahuecasfrontend/screen/hacerrecaudacion_screen.dart';
+import 'package:familiahuecasfrontend/screen/numeraciones.dart';
+import 'package:familiahuecasfrontend/screen/recaudaciones.dart';
 import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
 
-import 'hacerrecaudacion_screen.dart';
-import 'numeraciones.dart';
-
 class MaquinasScreen extends StatelessWidget {
+  MaquinasScreen({super.key});
+
+  final List<_MaquinaItem> items = [
+    _MaquinaItem('Hacer Recaudación', Icons.monetization_on, Colors.lightGreenAccent, HacerRecaudacionScreen()),
+    _MaquinaItem('Histórico de Recaudaciones', Icons.history, Colors.purpleAccent.shade100, RecaudacionesScreen()),
+    _MaquinaItem('Numeraciones', Icons.format_list_numbered, Colors.orangeAccent.shade100, NumeracionesScreen()),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonHeader(title: 'Máquinas'), // Usa CommonHeader
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: Align(
-          alignment: Alignment.topCenter, // Centra el contenido horizontalmente
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.85,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Botón "Hacer Recaudación"
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HacerRecaudacionScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.monetization_on, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Hacer Recaudación',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                // Botón "Histórico de Recaudaciones"
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => RecaudacionesScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Histórico de Recaudaciones',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                // Botón "Numeraciones"
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => NumeracionesScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.format_list_numbered, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Numeraciones',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+      appBar: const CommonHeader(title: 'Máquinas'),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+          children: items.map((item) => _buildItem(context, item)).toList(),
         ),
       ),
     );
   }
+
+  Widget _buildItem(BuildContext context, _MaquinaItem item) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => item.screen));
+      },
+      borderRadius: BorderRadius.circular(80),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Material(
+            color: item.color.withOpacity(0.7),
+            shape: const CircleBorder(),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Icon(item.icon, size: 40, color: Colors.white),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            item.title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MaquinaItem {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final Widget screen;
+
+  _MaquinaItem(this.title, this.icon, this.color, this.screen);
 }

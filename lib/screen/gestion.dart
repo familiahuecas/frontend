@@ -1,245 +1,90 @@
+import 'package:flutter/material.dart';
 import 'package:familiahuecasfrontend/screen/manageadelanto_screen.dart';
 import 'package:familiahuecasfrontend/screen/manageapunte_screen.dart';
 import 'package:familiahuecasfrontend/screen/totaladelanto_screen.dart';
 import 'package:familiahuecasfrontend/screen/veranticipos_screen.dart';
 import 'package:familiahuecasfrontend/screen/verapuntes_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:familiahuecasfrontend/screen/widget/common_header.dart';
-
 import '../apirest/api_service.dart';
 
 class GestionScreen extends StatelessWidget {
+  GestionScreen({super.key});
+
+  final List<_GestionItem> items = [
+    _GestionItem('Totales', Icons.account_balance_wallet, Colors.lightBlueAccent, TotalAdelantoScreen()),
+    _GestionItem('Ver Apuntes', Icons.book, Colors.lightGreenAccent, VerApuntesScreen()),
+    _GestionItem('Mis Apuntes', Icons.assignment, Colors.amberAccent, null, requiresUser: true),
+    _GestionItem('Crear Apunte', Icons.create, Colors.deepPurpleAccent.shade100, ManageApunteScreen()),
+    _GestionItem('Poner Anticipo', Icons.add_circle, Colors.pinkAccent.shade100, ManageAdelantoScreen()),
+    _GestionItem('Listar Anticipos', Icons.view_list, Colors.cyanAccent, VerAnticiposScreen()),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonHeader(title: 'Gestión'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.85,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Botón "Ver Total Adelanto"
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TotalAdelantoScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.account_balance_wallet, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Totales',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                // Botón "Ver Apuntes"
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => VerApuntesScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.book, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Ver Apuntes',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                // Botón "Mis Apuntes"
-                TextButton(
-                  onPressed: () async {
-                    // Obtener el usuario logado
-                    final user = await ApiService().getUser();
-                    if (user != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => VerApuntesScreen(usuario: user!.name!),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('No se pudo obtener el usuario logado')),
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.assignment, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Mis Apuntes',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                // Botón "Crear Apunte"
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ManageApunteScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.create, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Crear Apunte',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                // Botón "Crear Apunte"
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ManageAdelantoScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.create, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Poner anticipo',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => VerAnticiposScreen()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: Colors.blue[900]!, width: 1.5),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.view_list, color: Colors.blue[900]!, size: 32),
-                      SizedBox(height: 8),
-                      Text(
-                        'Listar anticipos',
-                        style: TextStyle(
-                          color: Colors.blue[900]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              ],
-            ),
-          ),
+      appBar: const CommonHeader(title: 'Gestión'),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+          children: items.map((item) => _buildItem(context, item)).toList(),
         ),
       ),
     );
   }
+
+  Widget _buildItem(BuildContext context, _GestionItem item) {
+    return InkWell(
+      onTap: () async {
+        if (item.requiresUser) {
+          final user = await ApiService().getUser();
+          if (user != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => VerApuntesScreen(usuario: user.name!)),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No se pudo obtener el usuario logado')),
+            );
+          }
+        } else {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => item.screen!));
+        }
+      },
+      borderRadius: BorderRadius.circular(80),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Material(
+            color: item.color.withOpacity(0.7),
+            shape: const CircleBorder(),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Icon(item.icon, size: 40, color: Colors.white),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            item.title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GestionItem {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final Widget? screen;
+  final bool requiresUser;
+
+  _GestionItem(this.title, this.icon, this.color, this.screen, {this.requiresUser = false});
 }

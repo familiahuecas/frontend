@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import '../apirest/api_service.dart';
 import '../model/user.dart';
 import 'home_screen.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/logger.dart';
+
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -9,12 +14,63 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final LocalAuthentication auth = LocalAuthentication();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isBiometricAvailable = false;
+  bool _canAuthenticateWithBiometrics = false;
+  String? _storedBiometricUsername;
+  bool _biometricCheckCompleted = false;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometricAvailability();
+  }
+
+  Future<void> _checkBiometricAvailability() async {
+    try {
+
+
+      final isDeviceSupported = await auth.isDeviceSupported();
+      final canCheckBiometrics = await auth.canCheckBiometrics;
+      final availableBiometrics = await auth.getAvailableBiometrics();
+
+      final prefs = await SharedPreferences.getInstance();
+      final storedPassword = prefs.getString('biometric_password');
+      final storedUsername = prefs.getString('biometric_username');
+      log('📊 Resultado biometría -> soportado: $isDeviceSupported | biométricos: $availableBiometrics | username: $storedUsername');
+
+      print('📥 Usuario recuperado al iniciar la app: $storedUsername');
+
+      setState(() {
+        _isBiometricAvailable = isDeviceSupported;
+        _canAuthenticateWithBiometrics =
+            canCheckBiometrics &&
+                availableBiometrics.isNotEmpty &&
+                storedUsername != null &&
+                storedPassword != null; // <- solo si también hay pass
+        _storedBiometricUsername = storedUsername;
+        _biometricCheckCompleted = true;
+      });
+
+    } catch (e) {
+      print('Error al verificar biometría: $e');
+      setState(() {
+        _isBiometricAvailable = false;
+        _canAuthenticateWithBiometrics = false;
+        _storedBiometricUsername = null;
+      });
+    }
+  }
+
+
 
   List<int> _buttonSequence = []; // Para registrar la secuencia de pulsaciones
 
@@ -70,6 +126,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await apiService.saveToken(token);
       await apiService.saveUser(user);
+
+      if (_buttonSequence.length != 4) {
+        // Solo guardar si el login fue por nombre/contraseña
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('biometric_username', _nameController.text);
+        await prefs.setString('biometric_password', _passwordController.text);
+       // log('✅ Usuario guardado para huella: ${_nameController.text}');
+       // log('✅ pass guardado para huella: ${_passwordController.text}');
+        setState(() {
+          _storedBiometricUsername = _nameController.text;
+          _canAuthenticateWithBiometrics = true;
+        });
+
+      }
+
 
       Navigator.pushReplacement(
         context,
@@ -134,6 +205,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    if (!_biometricCheckCompleted) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.deepPurple),
+        ),
+      );
+    }
     bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
@@ -243,6 +323,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildForm() {
+    log('🧩 ¿Mostrar botón de huella? $_canAuthenticateWithBiometrics');
+
     return Form(
       key: _formKey,
       child: Column(
@@ -300,6 +382,23 @@ class _LoginScreenState extends State<LoginScreen> {
             validator: _validatePassword,
           ),
           SizedBox(height: 20),
+
+
+          if (_canAuthenticateWithBiometrics) ...[
+            IconButton(
+              onPressed: _loginWithBiometrics,
+              icon: Icon(Icons.fingerprint, size: 32),
+              tooltip: 'Iniciar sesión con huella',
+              color: Colors.cyan,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple.shade50),
+                shape: MaterialStateProperty.all<CircleBorder>(const CircleBorder()),
+              ),
+            ),
+            SizedBox(height: 10),
+          ],
+
+
           if (_isLoading)
             Center(child: CircularProgressIndicator(color: Colors.purpleAccent)),
           if (_errorMessage != null)
@@ -315,4 +414,80 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  Future<void> _loginWithBiometrics() async {
+    try {
+      final auth = LocalAuthentication();
+      bool canAuthenticate = await auth.canCheckBiometrics || await auth.isDeviceSupported();
+
+      if (!canAuthenticate) {
+        setState(() {
+          _errorMessage = 'La autenticación biométrica no está disponible.';
+        });
+        return;
+      }
+
+      bool authenticated = await auth.authenticate(
+        localizedReason: 'Usa tu huella digital para acceder',
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if (authenticated) {
+        final storedUsername = _storedBiometricUsername;
+        log('🔍 Usuario recuperado desde memoria: $storedUsername');
+
+
+        if (storedUsername == null) {
+          log('❌ No hay usuario recordado para biometría');
+          setState(() {
+            _errorMessage = 'No hay usuario recordado para usar con huella.';
+          });
+          return;
+        }
+
+        final prefs = await SharedPreferences.getInstance();
+        final storedPassword = prefs.getString('biometric_password');
+
+        if (storedPassword == null) {
+          setState(() {
+            _errorMessage = 'No hay contraseña guardada para usar con huella.';
+          });
+          return;
+        }
+
+        final requestBody = {
+          'name': storedUsername,
+          'password': storedPassword,
+        };
+
+
+        const endpoint = '/auth/login';
+        final response = await apiService.post(endpoint, requestBody, requiresAuth: false);
+
+        if (!response.containsKey('token') || !response.containsKey('user')) {
+          throw Exception('La respuesta no contiene los datos necesarios.');
+        }
+
+        final token = response['token'];
+        final user = User.fromJson(response['user']);
+
+        await apiService.saveToken(token);
+        await apiService.saveUser(user);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
+        );
+      }
+    } catch (e) {
+      print('Error de biometría: $e');
+      setState(() {
+        _errorMessage = 'Error de red o del servidor: $e';
+      });
+    }
+  }
+
+
 }
