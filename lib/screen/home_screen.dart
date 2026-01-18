@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: Stack(
         children: [
           // 1. FONDO ANIMADO (Ambient Background)
-          const _LiquidBackground(),
+          const _StaticBackground(),
 
           // 2. CAPA DE CRISTAL (Opcional, para unificar el tono)
           Container(color: Colors.white.withOpacity(0.3)),
@@ -427,90 +427,63 @@ class _BentoCardState extends State<_BentoCard> {
 }
 
 // ============================================================================
-// FONDO "AURORA MESH" (Degradados líquidos animados)
+// FONDO "MESH" ESTÁTICO (Alto rendimiento, mismo look)
 // ============================================================================
 
-class _LiquidBackground extends StatefulWidget {
-  const _LiquidBackground();
-
-  @override
-  State<_LiquidBackground> createState() => _LiquidBackgroundState();
-}
-
-class _LiquidBackgroundState extends State<_LiquidBackground>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    // Animación lenta y continua (15 segundos por ciclo)
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 15),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _StaticBackground extends StatelessWidget {
+  const _StaticBackground();
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = _controller.value;
-        // Cálculos para movimiento orgánico (seno/coseno para curvas suaves)
-        final x1 = 0.5 * math.cos(t * 2 * math.pi);
-        final y1 = 0.3 * math.sin(t * 2 * math.pi);
+    // Obtenemos el tamaño para posicionar relativamente si queremos,
+    // o usamos posiciones fijas que funcionan bien en general.
+    return Stack(
+      children: [
+        // 1. Fondo base sólido (Gris muy claro / Blanco sucio)
+        Container(color: const Color(0xFFF5F7FA)),
 
-        final x2 = -0.5 * math.cos(t * 2 * math.pi + 1);
-        final y2 = -0.3 * math.sin(t * 2 * math.pi + 1);
+        // 2. Orbe Azul (Esquina superior izquierda)
+        Positioned(
+          top: -100,
+          left: -100,
+          child: _Blob(color: const Color(0xFF64B5F6), size: 500),
+        ),
 
-        final x3 = 0.3 * math.cos(t * 2 * math.pi + 2);
-        final y3 = 0.5 * math.sin(t * 2 * math.pi + 2);
+        // 3. Orbe Violeta (Esquina inferior derecha)
+        Positioned(
+          bottom: -100,
+          right: -100,
+          child: _Blob(color: const Color(0xFFBA68C8), size: 500),
+        ),
 
-        return Stack(
-          children: [
-            // 1. Fondo base sólido (Blanco sucio/Gris muy claro)
-            Container(color: const Color(0xFFF5F7FA)),
+        // 4. Orbe Ámbar (Centro-Derecha, para dar calidez)
+        Positioned(
+          top: MediaQuery.of(context).size.height * 0.3,
+          right: -50,
+          child: _Blob(color: const Color(0xFFFFB74D), size: 400),
+        ),
 
-            // 2. Orbe Azul (Movimiento circular amplio)
-            Align(
-              alignment: Alignment(x1 - 0.5, y1 - 0.5),
-              child: _Blob(color: const Color(0xFF64B5F6), size: 400),
-            ),
+        // 5. Orbe Verde Sutil (Abajo Izquierda, para equilibrar)
+        Positioned(
+          bottom: 50,
+          left: -80,
+          child: _Blob(color: const Color(0xFF81C784).withOpacity(0.5), size: 350),
+        ),
 
-            // 3. Orbe Violeta (Movimiento opuesto)
-            Align(
-              alignment: Alignment(x2 + 0.5, y2 + 0.5),
-              child: _Blob(color: const Color(0xFFBA68C8), size: 450),
-            ),
-
-            // 4. Orbe Ámbar/Naranja (Flotando en el centro)
-            Align(
-              alignment: Alignment(x3, y3),
-              child: _Blob(color: const Color(0xFFFFB74D), size: 350),
-            ),
-
-            // 5. BLUR MASIVO (El secreto del efecto Aurora)
-            // Esto difumina las bolas hasta que parecen nubes de color
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
-              child: Container(
-                color: Colors.white.withOpacity(0.4), // Capa blanca para suavizar
-              ),
-            ),
-          ],
-        );
-      },
+        // 6. BLUR MASIVO (Unifica todo en un degradado suave)
+        // Al ser estático, este filtro se aplica una sola vez al pintar.
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 60.0, sigmaY: 60.0),
+          child: Container(
+            color: Colors.white.withOpacity(0.3), // Capa unificadora
+          ),
+        ),
+      ],
     );
   }
 }
 
+// Reutilizamos tu clase _Blob, no hace falta cambiarla, pero asegúrate de tenerla:
 class _Blob extends StatelessWidget {
   final Color color;
   final double size;
@@ -525,8 +498,8 @@ class _Blob extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [color.withOpacity(0.6), color.withOpacity(0.0)],
-          radius: 0.8,
+          colors: [color.withOpacity(0.5), color.withOpacity(0.0)],
+          radius: 0.7,
         ),
       ),
     );

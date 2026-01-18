@@ -58,8 +58,8 @@ class _UsuariosScreenState extends State<UsuariosScreen> with TickerProviderStat
       ),
       body: Stack(
         children: [
-          // 1. FONDO LÍQUIDO (Misma consistencia que Home)
-          const _LiquidBackground(),
+          // 1. FONDO ESTÁTICO (Optimizado)
+          const _StaticBackground(),
 
           // 2. CONTENIDO
           SafeArea(
@@ -141,7 +141,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> with TickerProviderStat
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: isWide ? 2 : 1,
-        childAspectRatio: isWide ? 1.5 : 1.3,
+        childAspectRatio: isWide ? 1.4 : 1.2,
         crossAxisSpacing: 20,
         mainAxisSpacing: 20,
       ),
@@ -150,6 +150,9 @@ class _UsuariosScreenState extends State<UsuariosScreen> with TickerProviderStat
     );
   }
 }
+
+// ... (Las clases _ActionItem y _HeroActionCard se mantienen IGUAL que antes) ...
+// Si no las tienes a mano, avísame y te las pego, pero el cambio importante está abajo:
 
 // ============================================================================
 // TARJETAS "HERO" (Variante para Submenús)
@@ -199,7 +202,6 @@ class _HeroActionCardState extends State<_HeroActionCard> {
               ? (Matrix4.identity()..scale(1.02)..translate(0.0, -5.0))
               : Matrix4.identity(),
           decoration: BoxDecoration(
-            // Fondo base semitransparente
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -209,10 +211,7 @@ class _HeroActionCardState extends State<_HeroActionCard> {
               ],
             ),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-                color: Colors.white.withOpacity(0.6),
-                width: 1.5
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.6), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: widget.item.color1.withOpacity(_isHovered ? 0.3 : 0.05),
@@ -225,115 +224,76 @@ class _HeroActionCardState extends State<_HeroActionCard> {
             borderRadius: BorderRadius.circular(30),
             child: Stack(
               children: [
-                // 1. DECORACIÓN DE FONDO (Icono Gigante recortado)
+                // DECORACIÓN FONDO
                 Positioned(
-                  right: -40,
-                  bottom: -20,
+                  right: -40, bottom: -20,
                   child: Transform.rotate(
                     angle: -0.2,
-                    child: Icon(
-                      widget.item.icon,
-                      size: 200,
-                      color: widget.item.color1.withOpacity(0.08),
-                    ),
+                    child: Icon(widget.item.icon, size: 200, color: widget.item.color1.withOpacity(0.08)),
                   ),
                 ),
-
-                // 2. BRILLO SUPERIOR (EFECTO CRISTAL - IGUAL QUE HOME)
+                // BRILLO SUPERIOR
                 Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 120, // Altura del brillo
+                  top: 0, left: 0, right: 0, height: 120,
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withOpacity(0.5), // Blanco fuerte arriba
-                          Colors.transparent,            // Desvanece abajo
-                        ],
+                        colors: [Colors.white.withOpacity(0.5), Colors.transparent],
                       ),
                     ),
                   ),
                 ),
 
-                // 3. CONTENIDO
+                // CONTENIDO (Aquí está el ajuste principal)
                 Padding(
-                  padding: const EdgeInsets.all(30.0),
+                  // CAMBIO: Reducido de 30.0 a 24.0 para ganar espacio
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Icon Badge
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(14), // Reducido un poco
                         decoration: BoxDecoration(
-                            color: widget.item.color1.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: widget.item.color1.withOpacity(0.2),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4)
-                              )
-                            ]
+                          color: widget.item.color1.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
-                        child: Icon(widget.item.icon, color: widget.item.color1, size: 40),
+                        child: Icon(widget.item.icon, color: widget.item.color1, size: 36), // Icono un pelín más pequeño
                       ),
-                      const Spacer(),
 
-                      // Título
+                      const Spacer(), // Esto empuja todo hacia los extremos
+
                       Text(
-                        widget.item.title,
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.1,
-                        ),
+                          widget.item.title,
+                          style: const TextStyle(
+                              fontSize: 24, // Reducido de 26 a 24
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87
+                          )
                       ),
-                      const SizedBox(height: 8),
-
-                      // Subtítulo
+                      const SizedBox(height: 6),
                       Text(
                         widget.item.subtitle,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black54,
-                          height: 1.3,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                        maxLines: 2, // Aseguramos que no crezca infinitamente
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 20),
 
-                      // Botón visual "Acceder"
+                      const SizedBox(height: 16), // Reducido de 20 a 16
+
+                      // Botón
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                                colors: [widget.item.color1, widget.item.color2]
-                            ),
-                            borderRadius: BorderRadius.circular(50),
-                            boxShadow: [
-                              BoxShadow(
-                                color: widget.item.color1.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              )
-                            ]
+                          color: widget.item.color1,
+                          borderRadius: BorderRadius.circular(50),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                                "Acceder",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14
-                                )
-                            ),
+                            const Text("Acceder", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                             const SizedBox(width: 8),
                             const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
                           ],
@@ -352,56 +312,49 @@ class _HeroActionCardState extends State<_HeroActionCard> {
 }
 
 // ============================================================================
-// FONDO REUTILIZABLE (Copia exacta para consistencia visual)
+// FONDO ESTÁTICO (Optimizado para rendimiento)
 // ============================================================================
 
-class _LiquidBackground extends StatefulWidget {
-  const _LiquidBackground();
-  @override
-  State<_LiquidBackground> createState() => _LiquidBackgroundState();
-}
-
-class _LiquidBackgroundState extends State<_LiquidBackground> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 15))..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _StaticBackground extends StatelessWidget {
+  const _StaticBackground();
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = _controller.value;
-        final x1 = 0.5 * math.cos(t * 2 * math.pi);
-        final y1 = 0.3 * math.sin(t * 2 * math.pi);
-        final x2 = -0.5 * math.cos(t * 2 * math.pi + 1);
-        final y2 = -0.3 * math.sin(t * 2 * math.pi + 1);
-        final x3 = 0.3 * math.cos(t * 2 * math.pi + 2);
-        final y3 = 0.5 * math.sin(t * 2 * math.pi + 2);
+    return Stack(
+      children: [
+        // 1. Fondo base sólido
+        Container(color: const Color(0xFFF5F7FA)),
 
-        return Stack(
-          children: [
-            Container(color: const Color(0xFFF5F7FA)),
-            Align(alignment: Alignment(x1 - 0.5, y1 - 0.5), child: _Blob(color: const Color(0xFF64B5F6), size: 400)),
-            Align(alignment: Alignment(x2 + 0.5, y2 + 0.5), child: _Blob(color: const Color(0xFFBA68C8), size: 450)),
-            Align(alignment: Alignment(x3, y3), child: _Blob(color: const Color(0xFFFFB74D), size: 350)),
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
-              child: Container(color: Colors.white.withOpacity(0.4)),
-            ),
-          ],
-        );
-      },
+        // 2. Manchas de color fijas
+        Positioned(
+          top: -100,
+          left: -100,
+          child: _Blob(color: const Color(0xFF64B5F6), size: 500),
+        ),
+        Positioned(
+          bottom: -100,
+          right: -100,
+          child: _Blob(color: const Color(0xFFBA68C8), size: 500),
+        ),
+        Positioned(
+          top: MediaQuery.of(context).size.height * 0.3,
+          right: -50,
+          child: _Blob(color: const Color(0xFFFFB74D), size: 400),
+        ),
+        Positioned(
+          bottom: 50,
+          left: -80,
+          child: _Blob(color: const Color(0xFF81C784).withOpacity(0.5), size: 350),
+        ),
+
+        // 3. Filtro de desenfoque único
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 60.0, sigmaY: 60.0),
+          child: Container(
+            color: Colors.white.withOpacity(0.3),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -418,7 +371,10 @@ class _Blob extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(colors: [color.withOpacity(0.6), color.withOpacity(0.0)], radius: 0.8),
+        gradient: RadialGradient(
+          colors: [color.withOpacity(0.5), color.withOpacity(0.0)],
+          radius: 0.7,
+        ),
       ),
     );
   }

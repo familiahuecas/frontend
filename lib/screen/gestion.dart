@@ -61,8 +61,8 @@ class _GestionScreenState extends State<GestionScreen> with TickerProviderStateM
       ),
       body: Stack(
         children: [
-          // 1. FONDO LÍQUIDO (Consistente con Home y Users)
-          const _LiquidBackground(),
+          // 1. FONDO ESTÁTICO (Optimizado)
+          const _StaticBackground(),
 
           // 2. CONTENIDO
           SafeArea(
@@ -146,7 +146,6 @@ class _GestionScreenState extends State<GestionScreen> with TickerProviderStateM
         color1: const Color(0xFF0EA5E9), // Cyan/Sky
         color2: const Color(0xFF0284C7),
         onTap: () async {
-          // Lógica asíncrona original preservada
           final user = await ApiService().getUser();
           if (user != null) {
             Navigator.push(context, MaterialPageRoute(builder: (_) => VerApuntesScreen(usuario: user.name!)));
@@ -178,8 +177,9 @@ class _GestionScreenState extends State<GestionScreen> with TickerProviderStateM
     return GridView.builder(
       padding: const EdgeInsets.only(bottom: 20),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: isWide ? 2 : 1, // 2 columnas en PC, 1 en móvil
-        childAspectRatio: isWide ? 1.6 : 1.3, // Tarjetas rectangulares
+        crossAxisCount: isWide ? 2 : 1,
+        // CAMBIO AQUÍ: Hacemos las tarjetas más altas para evitar overflow
+        childAspectRatio: isWide ? 1.4 : 1.2,
         crossAxisSpacing: 20,
         mainAxisSpacing: 20,
       ),
@@ -190,7 +190,7 @@ class _GestionScreenState extends State<GestionScreen> with TickerProviderStateM
 }
 
 // ============================================================================
-// TARJETAS "HERO" (Con Brillo Superior - Copia exacta de user.dart)
+// TARJETAS "HERO" (Versión Anti-Overflow)
 // ============================================================================
 
 class _ActionItem {
@@ -259,21 +259,16 @@ class _HeroActionCardState extends State<_HeroActionCard> {
             borderRadius: BorderRadius.circular(30),
             child: Stack(
               children: [
-                // 1. DECORACIÓN DE FONDO
+                // DECORACIÓN DE FONDO
                 Positioned(
-                  right: -40,
-                  bottom: -20,
+                  right: -40, bottom: -20,
                   child: Transform.rotate(
                     angle: -0.2,
-                    child: Icon(
-                      widget.item.icon,
-                      size: 200,
-                      color: widget.item.color1.withOpacity(0.08),
-                    ),
+                    child: Icon(widget.item.icon, size: 200, color: widget.item.color1.withOpacity(0.08)),
                   ),
                 ),
 
-                // 2. BRILLO SUPERIOR (EFECTO CRISTAL)
+                // BRILLO SUPERIOR
                 Positioned(
                   top: 0, left: 0, right: 0, height: 120,
                   child: Container(
@@ -281,44 +276,48 @@ class _HeroActionCardState extends State<_HeroActionCard> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withOpacity(0.5),
-                          Colors.transparent,
-                        ],
+                        colors: [Colors.white.withOpacity(0.5), Colors.transparent],
                       ),
                     ),
                   ),
                 ),
 
-                // 3. CONTENIDO
+                // CONTENIDO AJUSTADO
                 Padding(
-                  padding: const EdgeInsets.all(30.0),
+                  // CAMBIO: Padding reducido de 30 a 24 para ganar espacio
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(14), // Reducido un poco
                         decoration: BoxDecoration(
-                            color: widget.item.color1.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(color: widget.item.color1.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))
-                            ]
+                          color: widget.item.color1.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
                         child: Icon(widget.item.icon, color: widget.item.color1, size: 36),
                       ),
+
                       const Spacer(),
+
                       Text(
                         widget.item.title,
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.1),
+                        style: const TextStyle(
+                          fontSize: 24, // Reducido de 26 a 24
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          height: 1.1,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         widget.item.subtitle,
                         style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.3),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16), // Reducido de 20 a 16
+
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
@@ -350,56 +349,26 @@ class _HeroActionCardState extends State<_HeroActionCard> {
 }
 
 // ============================================================================
-// FONDO LÍQUIDO (Igual que en Home y User)
+// FONDO ESTÁTICO (Optimizado para rendimiento - Copia de Home/User)
 // ============================================================================
 
-class _LiquidBackground extends StatefulWidget {
-  const _LiquidBackground();
-  @override
-  State<_LiquidBackground> createState() => _LiquidBackgroundState();
-}
-
-class _LiquidBackgroundState extends State<_LiquidBackground> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 15))..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _StaticBackground extends StatelessWidget {
+  const _StaticBackground();
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = _controller.value;
-        final x1 = 0.5 * math.cos(t * 2 * math.pi);
-        final y1 = 0.3 * math.sin(t * 2 * math.pi);
-        final x2 = -0.5 * math.cos(t * 2 * math.pi + 1);
-        final y2 = -0.3 * math.sin(t * 2 * math.pi + 1);
-        final x3 = 0.3 * math.cos(t * 2 * math.pi + 2);
-        final y3 = 0.5 * math.sin(t * 2 * math.pi + 2);
-
-        return Stack(
-          children: [
-            Container(color: const Color(0xFFF5F7FA)),
-            Align(alignment: Alignment(x1 - 0.5, y1 - 0.5), child: _Blob(color: const Color(0xFF64B5F6), size: 400)),
-            Align(alignment: Alignment(x2 + 0.5, y2 + 0.5), child: _Blob(color: const Color(0xFFBA68C8), size: 450)),
-            Align(alignment: Alignment(x3, y3), child: _Blob(color: const Color(0xFFFFB74D), size: 350)),
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
-              child: Container(color: Colors.white.withOpacity(0.4)),
-            ),
-          ],
-        );
-      },
+    return Stack(
+      children: [
+        Container(color: const Color(0xFFF5F7FA)),
+        Positioned(top: -100, left: -100, child: _Blob(color: const Color(0xFF64B5F6), size: 500)),
+        Positioned(bottom: -100, right: -100, child: _Blob(color: const Color(0xFFBA68C8), size: 500)),
+        Positioned(top: MediaQuery.of(context).size.height * 0.3, right: -50, child: _Blob(color: const Color(0xFFFFB74D), size: 400)),
+        Positioned(bottom: 50, left: -80, child: _Blob(color: const Color(0xFF81C784).withOpacity(0.5), size: 350)),
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 60.0, sigmaY: 60.0),
+          child: Container(color: Colors.white.withOpacity(0.3)),
+        ),
+      ],
     );
   }
 }
@@ -416,7 +385,10 @@ class _Blob extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(colors: [color.withOpacity(0.6), color.withOpacity(0.0)], radius: 0.8),
+        gradient: RadialGradient(
+          colors: [color.withOpacity(0.5), color.withOpacity(0.0)],
+          radius: 0.7,
+        ),
       ),
     );
   }
