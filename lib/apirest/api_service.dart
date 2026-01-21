@@ -877,4 +877,148 @@ class ApiService {
     }
   }
 
+  // ============================================================================
+  // APLICACIONES
+  // ============================================================================
+
+  // Obtener lista de aplicaciones
+  Future<List<Map<String, dynamic>>> getAplicaciones() async {
+    final url = Uri.parse('$baseUrl/aplicaciones/list');
+    final token = await _getToken();
+    print('Haciendo llamada a: $url');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Respuesta recibida: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(jsonList);
+      } else {
+        throw Exception('Error al obtener aplicaciones: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de red o del servidor: $e');
+    }
+  }
+
+  // Subir aplicacion (Web)
+  Future<void> uploadAppWeb(Uint8List bytes, String fileName) async {
+    try {
+      final url = Uri.parse('$baseUrl/aplicaciones/upload');
+      final token = await _getToken();
+
+      print('URL de subida: $url');
+      print('Iniciando subida de aplicacion: $fileName');
+      print('Tamano del archivo: ${bytes.length} bytes');
+
+      final mimeType = _determineMimeType(fileName);
+      print('Tipo MIME detectado: $mimeType');
+
+      final request = http.MultipartRequest('POST', url)
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: fileName,
+          contentType: MediaType.parse(mimeType),
+        ));
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('Codigo de respuesta: ${response.statusCode}');
+      if (response.statusCode != 200) {
+        print('Error al subir la aplicacion: ${response.body}');
+        throw Exception('Error al subir la aplicacion: ${response.body}');
+      }
+
+      print('Aplicacion subida exitosamente');
+    } catch (e) {
+      print('Error en la subida de la aplicacion: $e');
+      throw Exception('Error al subir la aplicacion: $e');
+    }
+  }
+
+  // Descargar aplicacion (Web)
+  Future<void> downloadAppWeb(int id, String fileName) async {
+    final url = '$baseUrl/aplicaciones/download/$id';
+    final token = await _getToken();
+
+    try {
+      print('Iniciando descarga desde: $url');
+
+      final request = html.HttpRequest();
+      request
+        ..open('GET', url)
+        ..setRequestHeader('Authorization', 'Bearer $token')
+        ..responseType = 'blob';
+
+      request.onLoad.listen((event) {
+        if (request.status == 200) {
+          print('Codigo de respuesta: ${request.status}');
+
+          final blob = request.response;
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..target = 'blank'
+            ..download = fileName;
+
+          html.document.body?.append(anchor);
+          anchor.click();
+          anchor.remove();
+
+          html.Url.revokeObjectUrl(url);
+
+          print('Aplicacion descargada exitosamente: $fileName');
+        } else {
+          print('Error en la descarga: Codigo: ${request.status}');
+          throw Exception('Error al descargar la aplicacion: ${request.status}');
+        }
+      });
+
+      request.onError.listen((event) {
+        print('Error en la solicitud HTTP: ${request.status}');
+        throw Exception('Error al descargar la aplicacion: ${request.status}');
+      });
+
+      request.send();
+    } catch (e) {
+      print('Excepcion capturada durante la descarga: $e');
+      throw Exception('Error al descargar la aplicacion: $e');
+    }
+  }
+
+  // Eliminar aplicacion
+  Future<void> deleteApp(int id) async {
+    final url = '$baseUrl/aplicaciones/delete/$id';
+    final token = await _getToken();
+    print('Enviando solicitud DELETE a: $url');
+
+    try {
+      final response = await Dio().delete(
+        url,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Error al eliminar la aplicacion: ${response.data}');
+      }
+    } catch (e) {
+      throw Exception('Error al eliminar la aplicacion: $e');
+    }
+  }
+
 }

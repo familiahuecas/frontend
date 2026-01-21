@@ -1,0 +1,78 @@
+PROMPT PARA IMPLEMENTAR BACKEND DE APLICACIONES
+================================================
+
+Necesito crear un modulo de "Aplicaciones" en el backend que permita subir, listar, descargar y eliminar aplicaciones (APK, IPA, EXE, etc.).
+
+CONTEXTO:
+- El frontend ya tiene implementadas las pantallas para esta funcionalidad
+- Los endpoints que espera el frontend son:
+  * GET /backend/aplicaciones/list
+  * POST /backend/aplicaciones/upload
+  * GET /backend/aplicaciones/download/{id}
+  * DELETE /backend/aplicaciones/delete/{id}
+
+TAREAS A REALIZAR:
+
+1. CREAR CARPETA DE ALMACENAMIENTO
+   - Crear directorio para almacenar las aplicaciones subidas
+   - Ejemplo: /uploads/aplicaciones/ o similar segun la estructura del proyecto
+   - Asegurar permisos de escritura/lectura
+
+2. CREAR ENTIDAD/MODELO "Aplicacion"
+   - id (Long/Integer, autoincremental)
+   - nombre (String) - nombre del archivo
+   - path (String) - ruta donde se guarda el archivo
+   - fechaCreacion (Date/Timestamp)
+   - tamanio (Long) - tamano en bytes (opcional)
+   - tipo (String) - extension del archivo (opcional)
+
+3. CREAR REPOSITORIO
+   - Repositorio JPA/similar para la entidad Aplicacion
+   - Metodos basicos: findAll, findById, save, deleteById
+
+4. CREAR SERVICIO "AplicacionService"
+   - listarAplicaciones(): devuelve lista de todas las apps
+   - subirAplicacion(MultipartFile file): guarda archivo y crea registro en BD
+   - descargarAplicacion(Long id): devuelve el archivo para descarga
+   - eliminarAplicacion(Long id): elimina archivo y registro de BD
+
+5. CREAR CONTROLADOR "AplicacionController"
+
+   @GetMapping("/aplicaciones/list")
+   - Retorna: List<Aplicacion> en JSON
+   - Respuesta ejemplo:
+     [
+       {"id": 1, "nombre": "app.apk", "fechaCreacion": "2024-01-15T10:30:00"},
+       {"id": 2, "nombre": "programa.exe", "fechaCreacion": "2024-01-16T14:20:00"}
+     ]
+
+   @PostMapping("/aplicaciones/upload")
+   - Recibe: MultipartFile con key "file"
+   - Guarda el archivo en la carpeta de aplicaciones
+   - Crea registro en base de datos
+   - Retorna: 200 OK si exito
+
+   @GetMapping("/aplicaciones/download/{id}")
+   - Recibe: id de la aplicacion
+   - Retorna: archivo como stream/blob para descarga
+   - Headers: Content-Disposition attachment, Content-Type apropiado
+
+   @DeleteMapping("/aplicaciones/delete/{id}")
+   - Recibe: id de la aplicacion
+   - Elimina archivo fisico y registro de BD
+   - Retorna: 200 OK si exito
+
+6. SEGURIDAD
+   - Todos los endpoints requieren autenticacion (Bearer Token)
+   - Usar el mismo sistema de auth que ya existe en el proyecto (similar a /documentos)
+
+7. CONFIGURACION
+   - Configurar tamano maximo de archivo permitido si es necesario
+   - Ejemplo en application.properties:
+     spring.servlet.multipart.max-file-size=500MB
+     spring.servlet.multipart.max-request-size=500MB
+
+NOTAS:
+- Seguir el mismo patron/estructura que ya existe para el modulo de "documentos"
+- El frontend envia el token en header "Authorization: Bearer {token}"
+- Los tipos de archivo esperados: APK, IPA, EXE, DMG, ZIP, RAR, 7Z, etc.

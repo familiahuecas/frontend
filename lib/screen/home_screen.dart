@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../apirest/api_service.dart';
 import '../core/app_theme.dart';
 import '../model/user.dart';
+import 'aplicaciones.dart';
 import 'documentos.dart';
 import 'gestion.dart';
 import 'maquinas.dart';
@@ -220,6 +221,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         color1: Color(0xFFFFB74D),
         color2: Color(0xFFF57C00),
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DocumentosScreen())),
+      ),
+      _BentoItem(
+        title: "Aplicaciones",
+        subtitle: "Subir y descargar apps",
+        icon: Icons.apps_rounded,
+        color1: Color(0xFF10B981),
+        color2: Color(0xFF059669),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AplicacionesScreen())),
       ),
     ];
 
