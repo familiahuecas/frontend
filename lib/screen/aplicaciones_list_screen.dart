@@ -91,6 +91,67 @@ class _AplicacionesListScreenState extends State<AplicacionesListScreen> with Ti
     }
   }
 
+  Future<void> _deleteApp(int id, String fileName) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Eliminar aplicación'),
+        content: Text('¿Estás seguro de que deseas eliminar "$fileName"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              Text('Eliminando $fileName...'),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      await _apiService.deleteApp(id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$fileName eliminado correctamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      _loadAplicaciones();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al eliminar: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -243,6 +304,7 @@ class _AplicacionesListScreenState extends State<AplicacionesListScreen> with Ti
         return _AppCard(
           app: app,
           onDownload: () => _downloadApp(app['id'], app['nombre']),
+          onDelete: () => _deleteApp(app['id'], app['nombre']),
         );
       },
     );
@@ -252,8 +314,9 @@ class _AplicacionesListScreenState extends State<AplicacionesListScreen> with Ti
 class _AppCard extends StatefulWidget {
   final Map<String, dynamic> app;
   final VoidCallback onDownload;
+  final VoidCallback onDelete;
 
-  const _AppCard({required this.app, required this.onDownload});
+  const _AppCard({required this.app, required this.onDownload, required this.onDelete});
 
   @override
   State<_AppCard> createState() => _AppCardState();
@@ -352,31 +415,49 @@ class _AppCardState extends State<_AppCard> {
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 )
               : null,
-          trailing: Material(
-            color: appColor,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: widget.onDownload,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.download_rounded, color: Colors.white, size: 20),
-                    SizedBox(width: 6),
-                    Text(
-                      'Descargar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Material(
+                color: appColor,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: widget.onDownload,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.download_rounded, color: Colors.white, size: 20),
+                        SizedBox(width: 6),
+                        Text(
+                          'Descargar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Material(
+                color: Colors.red[400],
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: widget.onDelete,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    child: const Icon(Icons.delete_rounded, color: Colors.white, size: 20),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
